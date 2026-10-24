@@ -230,9 +230,9 @@ graph LR
   n_FastAPI_Service["FastAPI Service<br/>Containerised backend (ECS Fargate or EC2)"]
   n_PostgreSQL["PostgreSQL<br/>Amazon RDS for PostgreSQL 16"]
   n_OpenAI_API["OpenAI API<br/>OpenAI hosted models (SaaS)"]
-  n_React_SPA -->|HTTPS| n_FastAPI_Service
-  n_FastAPI_Service -->|TLS/Postgres| n_PostgreSQL
-  n_FastAPI_Service -->|HTTPS| n_OpenAI_API
+  n_React_SPA -->|"HTTPS"| n_FastAPI_Service
+  n_FastAPI_Service -->|"TLS/Postgres"| n_PostgreSQL
+  n_FastAPI_Service -->|"HTTPS"| n_OpenAI_API
 ```
 <!-- sdlc:auto:end deployment-view -->
 

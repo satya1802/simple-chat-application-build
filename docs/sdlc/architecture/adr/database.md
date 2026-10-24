@@ -1,7 +1,7 @@
 <!-- sdlc:auto:start adr -->
 # ADR-0003: Use PostgreSQL 16 for Database
 
-Status: Accepted
+Status: Accepted  
 Date: 2026-10-16
 
 ## Context and Problem Statement

@@ -1,7 +1,7 @@
 <!-- sdlc:auto:start adr -->
 # ADR-0001: Use React 19 for Frontend
 
-Status: Accepted
+Status: Accepted  
 Date: 2026-10-16
 
 ## Context and Problem Statement

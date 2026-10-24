@@ -3,151 +3,152 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEV-PLAN-OVERVIEW · approved · source: development:plan
+### PLAN-v5 · approved · source: plan:v5
 
-Approved v1 delivery plan splits the 4 epics / 22 stories into 4 sprints of 20-point capacity each.
+Development plan version 5 is approved. It organizes the 22-story backlog (4 epics) into 4 sprints of capacity 20 each, moving from authentication, through core chat, to conversation management, then polish and setup docs.
 
-Sprint 1 - Auth Foundation (capacity 20): self-registration, bcrypt hashing, login+JWT, pre-auth route gating, logout. Sprint 2 - Core Chat Flow (capacity 20): Chat Dashboard shell, authenticated chat endpoints, OpenAI integration, single send/receive reply. Sprint 3 - Context, Feedback & Conversation Access (capacity 20): thread context, pending indicator, inline error handling, message persistence, sidebar list, replay, New Chat. Sprint 4 - Management, Security & Polish (capacity 20): auto-titling, delete, persistence/ownership verification, responsive layout, setup docs. The plan input lists sprint goals and a flat backlog of epics/stories/tasks with points and assigned agent roles, but does not explicitly map individual backlog items to a specific sprint id.
+Approved plan (version 5):
+- Sprint 1 - Auth Foundation (capacity 20): Self-registration, bcrypt hashing, JWT login, gated Login-only unauthenticated access, and Logout. Covers US-001–US-006 (EPIC-001), 21 committed points.
+- Sprint 2 - Core Chat Flow (capacity 20): Chat Dashboard shell, authenticated chat endpoints, OpenAI-backed send/reply loop with server-side key. Covers US-007–US-012 (EPIC-002), 24 committed points.
+- Sprint 3 - Context, Feedback & Conversation Access (capacity 20): Conversation context for replies, typing/error feedback, sidebar listing, replay, new chat/switching, timestamped persistence. Covers US-013–US-020 (EPIC-003), 22 committed points.
+- Sprint 4 - Management, Security & Polish (capacity 20): Auto-titling, delete, cross-user security, refresh/re-login persistence verification, responsive layout, setup docs. Covers US-021–US-022 (EPIC-004), 7 committed points.
+Total backlog: 4 epics, 22 stories, 74 story points.
 
-**Related:** EPIC-001, EPIC-002, EPIC-003, EPIC-004
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019, US-020, US-021, US-022
 
-- ⚠ Input does not explicitly state which backlog items belong to which sprint -- the sprint-to-epic correspondence below is inferred from matching goal wording to epic titles, not given as an explicit mapping.
+- ⚠ Sprints 1, 2 and 3 each commit more points than their stated 20-point capacity (21, 24, 22 respectively) — see individual sprint entries for the discrepancy.
 
-### DEV-SPRINT-1 · approved · source: development:plan:Sprint 1
+### SPRINT-1 · approved · source: plan:Sprint 1
 
-Sprint 1 - Auth Foundation: self-registration, bcrypt hashing, login+JWT, pre-auth route gating, logout. Capacity 20.
+Sprint 1 - Auth Foundation (EPIC-001: Account Creation, Login and Session Handling). Goal: self-registration, bcrypt hashing, JWT login, Login-only gating before auth, chat-endpoint auth guard, and logout.
 
-Goal text aligns with EPIC-001's stories (US-001 through US-006), inferred by matching wording -- not an explicit item-to-sprint assignment in the input.
+Capacity: 20 points. Committed: 21 points (1 over capacity).
+Stories/tasks:
+- US-001 (5 pts, backend-agent) Create an account by self-registration — tasks: design users table migration; build POST /auth/register; build Sign-up page UI; wire Sign-up form to register API.
+- US-002 (3 pts, backend-agent) Passwords stored hashed with bcrypt — tasks: integrate bcrypt hashing on registration; implement bcrypt verification on login; test per-user salting and response safety (qa-agent).
+- US-003 (5 pts, backend-agent) Log in with username and password — tasks: implement POST /auth/login; issue JWT access token; build Login form UI (frontend-agent); store token and redirect to dashboard (frontend-agent).
+- US-004 (3 pts, frontend-agent) Only the Login page is reachable before authentication — tasks: implement protected route guard; redirect unauthenticated visitors; restrict pre-auth navigation to Sign-up link only.
+- US-005 (3 pts, backend-agent) Chat endpoints reject unauthenticated requests — tasks: add JWT auth dependency; apply auth guard to all chat endpoints; test 401 responses for bad tokens (qa-agent).
+- US-006 (2 pts, frontend-agent) Log out and return to the Login page — tasks: add Logout control; discard token and redirect.
 
-**Related:** EPIC-001, REQ-US-001, REQ-US-002, REQ-US-003, REQ-US-004, REQ-US-005, REQ-US-006
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006
 
-- ⚠ Explicit item list for this sprint was not provided; mapping to US-001..US-006 is inferred.
+- ⚠ Committed points (21) exceed stated sprint capacity (20) by 1 — not flagged as resolved in the input.
+- ⚠ Only 5 of this sprint's 6 stories (missing US-005) appear in the development run status; see DEVRUN-SPRINT1.
 
-### DEV-SPRINT-2 · approved · source: development:plan:Sprint 2
+### SPRINT-2 · approved · source: plan:Sprint 2
 
-Sprint 2 - Core Chat Flow: Chat Dashboard shell, authenticated chat endpoints, OpenAI integration, single send/receive reply. Capacity 20.
+Sprint 2 - Core Chat Flow (EPIC-002: Chat Dashboard and AI Assistant Replies). Goal: Chat Dashboard shell, authenticated chat endpoints, OpenAI-backed send/reply loop using a server-side API key.
 
-Goal text aligns with part of EPIC-002 (US-007, US-008, US-012), inferred by matching wording -- not an explicit item-to-sprint assignment in the input.
+Capacity: 20 points. Committed: 24 points (4 over capacity).
+Stories/tasks:
+- US-007 (5 pts, frontend-agent) Land on the Chat Dashboard after login — tasks: build Chat Dashboard shell; fetch conversations on load; implement empty-state view.
+- US-008 (8 pts, integration-agent) Send a message and receive an AI reply — tasks: implement message send endpoint; integrate OpenAI chat completion call; persist assistant reply; wire frontend send flow; handle first-message new conversation creation.
+- US-009 (3 pts, integration-agent) Earlier messages sent to the model as context — tasks: query conversation history in order; assemble context into OpenAI request; test conversation context isolation (qa-agent).
+- US-010 (2 pts, frontend-agent) Typing / pending indicator while waiting for a reply — tasks: add typing/pending indicator; disable Send while pending.
+- US-011 (3 pts, frontend-agent) Inline error when the model call fails — tasks: handle model call failures in backend; render inline error in thread; verify no partial reply persisted on failure (qa-agent).
+- US-012 (3 pts, integration-agent) Hosted model configured by API key — tasks: load OPENAI_API_KEY from configuration (devops-agent); build OpenAI client service; add missing-key startup check.
 
-**Related:** EPIC-002, REQ-US-007, REQ-US-008, REQ-US-012
+**Related:** US-007, US-008, US-009, US-010, US-011, US-012
 
-- ⚠ Explicit item list for this sprint was not provided; mapping is inferred and partial.
+- ⚠ Committed points (24) exceed stated sprint capacity (20) by 4.
+- ⚠ No development run data exists for any Sprint 2 story; build status is entirely undocumented.
 
-### DEV-SPRINT-3 · approved · source: development:plan:Sprint 3
+### SPRINT-3 · approved · source: plan:Sprint 3
 
-Sprint 3 - Context, Feedback & Conversation Access: thread context, pending indicator, inline error handling, message persistence, sidebar list, replay, New Chat. Capacity 20.
+Sprint 3 - Context, Feedback & Conversation Access (EPIC-003: Conversation Management and Persistent History). Goal: sidebar listing, replay, new chat/switching, auto-titling groundwork, and timestamped persistence.
 
-Goal text aligns with remaining EPIC-002 stories (US-009, US-010, US-011) plus early EPIC-003 stories (US-013, US-014, US-015), inferred by matching wording -- not an explicit item-to-sprint assignment in the input.
+Capacity: 20 points. Committed: 22 points (2 over capacity).
+Stories/tasks:
+- US-013 (3 pts, frontend-agent) See my past conversations in the sidebar — tasks: scoped GET /conversations endpoint; render sidebar conversation list; highlight selected conversation; add empty sidebar state.
+- US-014 (3 pts, frontend-agent) Select a conversation and replay its messages — tasks: GET /conversations/{id}/messages endpoint; replay selected conversation; append new sends to the open conversation.
+- US-015 (3 pts, frontend-agent) Start a New Chat and switch between conversations — tasks: POST /conversations endpoint; add New Chat control; implement conversation switching.
+- US-016 (2 pts, backend-agent) Conversations auto-titled from the first message — tasks: generate auto-title from first message; persist title once; display title in sidebar.
+- US-017 (2 pts, frontend-agent) Delete a conversation — tasks: DELETE /conversations/{id} endpoint; add delete control with confirmation; clear dashboard on deleting open conversation.
+- US-018 (3 pts, backend-agent) Messages saved with timestamps as they happen — tasks: design messages table schema; write user message row immediately; write assistant reply row immediately.
+- US-019 (3 pts, backend-agent) History survives page refresh and re-login — tasks: reload state from API on mount/refresh (frontend-agent); verify persistence across logout/login (qa-agent); confirm ordered history read path.
+- US-020 (3 pts, security-agent) Conversations visible only to their owner — tasks: enforce ownership filter on all queries; return 403/404 for cross-user access; add cross-user access security tests (qa-agent).
 
-**Related:** EPIC-002, EPIC-003, REQ-US-009, REQ-US-010, REQ-US-011, REQ-US-013, REQ-US-014, REQ-US-015
+**Related:** US-013, US-014, US-015, US-016, US-017, US-018, US-019, US-020
 
-- ⚠ Explicit item list for this sprint was not provided; mapping is inferred.
+- ⚠ Committed points (22) exceed stated sprint capacity (20) by 2.
+- ⚠ No development run data exists for any Sprint 3 story; build status is entirely undocumented.
 
-### DEV-SPRINT-4 · approved · source: development:plan:Sprint 4
+### SPRINT-4 · approved · source: plan:Sprint 4
 
-Sprint 4 - Management, Security & Polish: auto-titling, delete, persistence and ownership verification, responsive layout, setup documentation. Capacity 20.
+Sprint 4 - Management, Security & Polish (EPIC-004: Responsive Interface and Running the App). Goal: responsive layout verification and setup/run documentation.
 
-Goal text aligns with remaining EPIC-003 stories (US-016 through US-020) plus all of EPIC-004 (US-021, US-022), inferred by matching wording -- not an explicit item-to-sprint assignment in the input.
+Capacity: 20 points. Committed: 7 points (well under capacity).
+Stories/tasks:
+- US-021 (5 pts, frontend-agent) Simple, clean, responsive layout that works on a phone — tasks: build responsive dashboard layout; add sidebar toggle for phone widths; implement auto-scroll to latest message; verify Login/Sign-up responsiveness (qa-agent).
+- US-022 (2 pts, devops-agent) Setup and run instructions — tasks: write README setup instructions; document environment configuration; verify end-to-end setup on a clean machine (qa-agent).
 
-**Related:** EPIC-003, EPIC-004, REQ-US-016, REQ-US-017, REQ-US-018, REQ-US-019, REQ-US-020, REQ-US-021, REQ-US-022
+**Related:** US-021, US-022
 
-- ⚠ Explicit item list for this sprint was not provided; mapping is inferred.
+- ⚠ No development run data exists for any Sprint 4 story; build status is entirely undocumented.
 
-### DEV-BACKLOG-EPIC-001 · approved · source: development:plan:backlog:EPIC-001
+### DEVRUN-SPRINT1 · draft · source: dev:run-status
 
-Backlog breakdown for EPIC-001: 6 stories, 21 points, split across backend-agent and frontend-agent with qa-agent for test tasks.
+The development run is marked 'failed'. Only 5 of Sprint 1's 6 stories were reported, none completed, and no commits exist for any ticket.
 
-US-001 Create account by self-registration (5pts, backend-agent) -- tasks: users table migration, POST /auth/register, Sign-up form, wire registration to sign-in/redirect. US-002 Passwords hashed with bcrypt (3pts, backend-agent) -- tasks: bcrypt hashing on registration, bcrypt verification on login, unit tests (qa-agent). US-003 Log in (5pts, backend-agent) -- tasks: POST /auth/login, Login form, store JWT+redirect. US-004 Only Login reachable pre-auth (3pts, frontend-agent) -- tasks: auth-gated routing, restrict pre-auth navigation. US-005 Chat endpoints reject unauthenticated requests (3pts, backend-agent) -- tasks: JWT auth dependency, apply to all chat/conversation routes, handle 401 on frontend, auth rejection tests (qa-agent). US-006 Logout (2pts, frontend-agent) -- tasks: Logout control, verify back-navigation (qa-agent).
+Overall run status: failed. Reported tickets: US-001 = planned (no commit); US-002 = skipped (no commit); US-003 = skipped (no commit); US-004 = planned (no commit); US-006 = skipped (no commit). US-005 (also Sprint 1 / EPIC-001 scope) has no entry in the run output at all. No ticket reached an implemented/done state in this run.
 
-**Related:** REQ-US-001, REQ-US-002, REQ-US-003, REQ-US-004, REQ-US-005, REQ-US-006
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006
 
-### DEV-BACKLOG-EPIC-002 · approved · source: development:plan:backlog:EPIC-002
+- ⚠ No root-cause or error detail was provided for the overall 'failed' run status.
+- ⚠ US-005 (Chat endpoints reject unauthenticated requests) is in Sprint 1/EPIC-001 scope but is absent from the run output — unclear if it was attempted.
+- ⚠ Tickets marked 'planned' (US-001, US-004) have no commit, so it is unconfirmed whether any implementation work exists beyond planning.
+- ⚠ Reason for skipping US-002, US-003, US-006 is not stated.
 
-Backlog breakdown for EPIC-002: 6 stories, 24 points, spanning frontend-agent, backend-agent, and integration-agent.
+### DEV-US-001 · draft · source: dev:US-001
 
-US-007 Land on Chat Dashboard (5pts, frontend-agent). US-008 Send message/receive AI reply (8pts, integration-agent) -- tasks across frontend, backend endpoint, OpenAI integration, rendering. US-009 Earlier messages as context (3pts, integration-agent) -- backend context assembly and scoping, qa test cases. US-010 Typing/pending indicator (2pts, frontend-agent). US-011 Inline error on model failure (3pts, frontend-agent) -- backend failure surfacing, frontend display, qa verification of no fabricated reply. US-012 Hosted model via API key (3pts, integration-agent) -- load OPENAI_API_KEY, log config error on missing key.
+Self-registration ticket (US-001) is in 'planned' state in the failed development run; no commit recorded.
 
-**Related:** REQ-US-007, REQ-US-008, REQ-US-009, REQ-US-010, REQ-US-011, REQ-US-012
+Plan defines tasks: design users table migration, build POST /auth/register endpoint, build Sign-up page UI, wire Sign-up form to register API. Run status reports this ticket as 'planned' with commit=(none), meaning implementation has not been confirmed to have started.
 
-### DEV-BACKLOG-EPIC-003 · approved · source: development:plan:backlog:EPIC-003
+**Related:** US-001
 
-Backlog breakdown for EPIC-003: 8 stories, 22 points, spanning frontend-agent, backend-agent, security-agent, and qa-agent.
+- ⚠ No commit or code artifact exists for this ticket; actual implementation progress beyond 'planned' is unknown.
 
-US-013 Sidebar conversation list (3pts, frontend-agent). US-014 Select/replay conversation (3pts, frontend-agent). US-015 New Chat + switching (3pts, frontend-agent). US-016 Auto-titling (2pts, backend-agent). US-017 Delete conversation (2pts, frontend-agent). US-018 Messages saved with timestamps (3pts, backend-agent) -- includes qa verification of chronological replay. US-019 History survives refresh/re-login (3pts, backend-agent) -- includes frontend reload-on-start task and qa verification. US-020 Conversations visible only to owner (3pts, security-agent) -- backend ownership enforcement on read/delete endpoints plus qa cross-user access tests.
+### DEV-US-002 · draft · source: dev:US-002
 
-**Related:** REQ-US-013, REQ-US-014, REQ-US-015, REQ-US-016, REQ-US-017, REQ-US-018, REQ-US-019, REQ-US-020
+Bcrypt password hashing ticket (US-002) was skipped in the development run; not implemented.
 
-### DEV-BACKLOG-EPIC-004 · approved · source: development:plan:backlog:EPIC-004
+Plan defines tasks: integrate bcrypt hashing on registration, implement bcrypt verification on login, test per-user salting and response safety. Run status reports this ticket as 'skipped' with commit=(none).
 
-Backlog breakdown for EPIC-004: 2 stories, 7 points, covering frontend-agent and devops-agent.
+**Related:** US-002
 
-US-021 Responsive layout (5pts, frontend-agent) -- responsive dashboard and login/signup layouts, auto-scroll, cross-device QA pass (qa-agent). US-022 Setup and run instructions (2pts, devops-agent) -- README setup instructions, environment configuration docs, end-to-end clean-machine verification (qa-agent).
+- ⚠ No reason given for skipping this security-critical ticket.
+- ⚠ Password hashing is a stated core requirement (bcrypt) and remains unimplemented per this run.
 
-**Related:** REQ-US-021, REQ-US-022
+### DEV-US-003 · draft · source: dev:US-003
 
-### DEV-RUN-OVERVIEW · draft · source: development:run
+Login ticket (US-003) was skipped in the development run; not implemented.
 
-The development execution run is recorded as FAILED. Only 5 of the 22 planned stories have any ticket record, and none has a commit.
+Plan defines tasks: implement POST /auth/login endpoint, issue JWT access token, build Login form UI, store token and redirect to dashboard. Run status reports this ticket as 'skipped' with commit=(none).
 
-Reported tickets: US-001 (planned, no commit), US-002 (skipped, no commit), US-003 (skipped, no commit), US-004 (planned, no commit), US-006 (skipped, no commit). No tickets are reported for US-005, US-007 through US-022. No ticket shows status 'done' or carries a commit reference, so there is no evidence any code has actually been merged.
+**Related:** US-003
 
-**Related:** DEV-PLAN-OVERVIEW
+- ⚠ No reason given for skipping.
+- ⚠ Login is foundational to the whole application; its absence blocks all downstream authenticated functionality.
 
-- ⚠ Overall run status is 'failed' with no stated reason provided in the input.
-- ⚠ 17 of 22 planned stories (including all of EPIC-002, EPIC-003, EPIC-004) have no run record at all -- unclear if they were never attempted or simply not reported.
-- ⚠ Two critical-path stories were skipped outright: US-002 (bcrypt password hashing) and US-003 (login/JWT issuance) -- these are prerequisites for nearly every other story, so their skip likely blocks downstream work.
-- ⚠ No commit hashes exist for any ticket, so no implementation can be verified against the approved plan or architecture.
+### DEV-US-004 · draft · source: dev:US-004
 
-### DEV-TICKET-US-001 · draft · source: development:run:US-001
+Login-only pre-auth gating ticket (US-004) is in 'planned' state; no commit recorded.
 
-Ticket for 'Create an account by self-registration' is in planned status; no commit exists yet.
+Plan defines tasks: implement protected route guard, redirect unauthenticated visitors, restrict pre-auth navigation to Sign-up link only. Run status reports this ticket as 'planned' with commit=(none).
 
-Status: planned. Commit: none. No implementation evidence provided.
+**Related:** US-004
 
-**Related:** REQ-US-001
+- ⚠ No commit or code artifact exists; implementation progress beyond 'planned' is unknown.
 
-- ⚠ Not yet implemented; no commit or completion evidence.
+### DEV-US-006 · draft · source: dev:US-006
 
-### DEV-TICKET-US-002 · draft · source: development:run:US-002
+Logout ticket (US-006) was skipped in the development run; not implemented.
 
-Ticket for 'Passwords stored hashed with bcrypt' was skipped; no commit exists.
+Plan defines tasks: add Logout control, discard token and redirect. Run status reports this ticket as 'skipped' with commit=(none).
 
-Status: skipped. Commit: none. No reason for skipping is provided in the input.
+**Related:** US-006
 
-**Related:** REQ-US-002
-
-- ⚠ Skipped with no stated reason; this is a critical security requirement (bcrypt hashing) and remains unimplemented.
-- ⚠ Reason for skip not provided -- cannot be inferred.
-
-### DEV-TICKET-US-003 · draft · source: development:run:US-003
-
-Ticket for 'Log in with username and password' was skipped; no commit exists.
-
-Status: skipped. Commit: none. No reason for skipping is provided in the input.
-
-**Related:** REQ-US-003
-
-- ⚠ Skipped with no stated reason; this is a critical story (login/JWT issuance) and remains unimplemented.
-- ⚠ Reason for skip not provided -- cannot be inferred.
-
-### DEV-TICKET-US-004 · draft · source: development:run:US-004
-
-Ticket for 'Only the Login page is reachable before authentication' is in planned status; no commit exists yet.
-
-Status: planned. Commit: none. No implementation evidence provided.
-
-**Related:** REQ-US-004
-
-- ⚠ Not yet implemented; no commit or completion evidence.
-
-### DEV-TICKET-US-006 · draft · source: development:run:US-006
-
-Ticket for 'Log out and return to the Login page' was skipped; no commit exists.
-
-Status: skipped. Commit: none. No reason for skipping is provided in the input.
-
-**Related:** REQ-US-006
-
-- ⚠ Skipped with no stated reason; remains unimplemented.
-- ⚠ Reason for skip not provided -- cannot be inferred.
+- ⚠ No reason given for skipping.
 <!-- sdlc:auto:end narrative -->
