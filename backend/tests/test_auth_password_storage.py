@@ -15,9 +15,7 @@ def test_ac005_stored_value_is_a_bcrypt_hash_and_plaintext_appears_nowhere(
     client: TestClient, db_session: Session
 ) -> None:
     password = "super-secret-plaintext-9"
-    response = client.post(
-        "/auth/register", json={"username": "dana", "password": password}
-    )
+    response = client.post("/auth/register", json={"username": "dana", "password": password})
     assert response.status_code in (200, 201)
 
     row = db_session.query(User).filter_by(username="dana").one()

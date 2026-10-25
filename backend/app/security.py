@@ -54,9 +54,8 @@ def create_access_token(
         "sub": str(user_id),
         "username": username,
         "iat": now,
-        "exp": now + (expires_delta if expires_delta is not None else timedelta(
-            minutes=JWT_EXPIRES_MINUTES
-        )),
+        "exp": now
+        + (expires_delta if expires_delta is not None else timedelta(minutes=JWT_EXPIRES_MINUTES)),
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 

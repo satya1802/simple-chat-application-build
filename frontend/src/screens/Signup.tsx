@@ -122,11 +122,18 @@ export default function Screen() {
             <p className="text-sm font-semibold tracking-wide" style={{ color: accentSoft }}>
               Pocket Messenger
             </p>
-            <p className="mt-5 text-3xl leading-snug font-semibold" style={{ fontFamily: brand.fontHeading }}>
+            <p
+              className="mt-5 text-3xl leading-snug font-semibold"
+              style={{ fontFamily: brand.fontHeading }}
+            >
               An assistant that keeps
               <span
                 className="mx-1 inline-block px-1"
-                style={{ backgroundColor: brand.accentColor, color: ink, borderRadius: brand.radius }}
+                style={{
+                  backgroundColor: brand.accentColor,
+                  color: ink,
+                  borderRadius: brand.radius,
+                }}
               >
                 the whole thread
               </span>
@@ -139,7 +146,10 @@ export default function Screen() {
           <div className="lg:hidden mb-6 flex items-center gap-2">
             <span
               className="inline-block h-7 w-7"
-              style={{ backgroundColor: brand.primaryColor, borderRadius: `calc(${brand.radius} * 1.4)` }}
+              style={{
+                backgroundColor: brand.primaryColor,
+                borderRadius: `calc(${brand.radius} * 1.4)`,
+              }}
               aria-hidden="true"
             />
             <span className="text-sm font-semibold" style={{ color: brand.primaryColor }}>
@@ -162,19 +172,34 @@ export default function Screen() {
                   className="pm-pop mx-auto flex h-14 w-14 items-center justify-center rounded-full"
                   style={{ backgroundColor: accentSoft }}
                 >
-                  <CheckCircle className="h-7 w-7" style={{ color: brand.primaryColor }} aria-hidden="true" />
+                  <CheckCircle
+                    className="h-7 w-7"
+                    style={{ color: brand.primaryColor }}
+                    aria-hidden="true"
+                  />
                 </span>
-                <h1 className="mt-5 text-2xl font-semibold" style={{ fontFamily: brand.fontHeading, color: ink }}>
+                <h1
+                  className="mt-5 text-2xl font-semibold"
+                  style={{ fontFamily: brand.fontHeading, color: ink }}
+                >
                   You're in, @{createdName}
                 </h1>
-                <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed" style={{ color: muted }}>
-                  Your account is saved and you're signed in. Your first chat starts the moment you type.
+                <p
+                  className="mx-auto mt-2 max-w-sm text-sm leading-relaxed"
+                  style={{ color: muted }}
+                >
+                  Your account is saved and you're signed in. Your first chat starts the moment you
+                  type.
                 </p>
                 <Button
                   type="button"
                   onClick={() => navigate("chat")}
                   className="pm-focus mt-6 w-full justify-center px-4 py-3 text-base font-semibold"
-                  style={{ backgroundColor: brand.primaryColor, color: "#fff", borderRadius: brand.radius }}
+                  style={{
+                    backgroundColor: brand.primaryColor,
+                    color: "#fff",
+                    borderRadius: brand.radius,
+                  }}
                 >
                   Open my chats
                 </Button>
@@ -191,21 +216,32 @@ export default function Screen() {
                   Back to sign in
                 </button>
 
-                <h1 className="text-3xl font-semibold tracking-tight" style={{ fontFamily: brand.fontHeading, color: ink }}>
+                <h1
+                  className="text-3xl font-semibold tracking-tight"
+                  style={{ fontFamily: brand.fontHeading, color: ink }}
+                >
                   Create your account
                 </h1>
                 <p className="mt-2 text-sm leading-relaxed" style={{ color: muted }}>
-                  A username and a password is all it takes -- no email, no invitation, no waiting for
-                  approval.
+                  A username and a password is all it takes -- no email, no invitation, no waiting
+                  for approval.
                 </p>
 
                 {formError && (
                   <div
                     role="alert"
                     className="pm-rise mt-5 flex items-start gap-2.5 px-3.5 py-3"
-                    style={{ backgroundColor: dangerSoft, borderRadius: brand.radius, border: `1px solid ${hairline}` }}
+                    style={{
+                      backgroundColor: dangerSoft,
+                      borderRadius: brand.radius,
+                      border: `1px solid ${hairline}`,
+                    }}
                   >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" style={{ color: dangerInk }} aria-hidden="true" />
+                    <AlertCircle
+                      className="mt-0.5 h-4 w-4 shrink-0"
+                      style={{ color: dangerInk }}
+                      aria-hidden="true"
+                    />
                     <div>
                       <p className="text-sm font-semibold" style={{ color: ink }}>
                         {formError.title}
@@ -220,11 +256,18 @@ export default function Screen() {
                 <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-6">
                   <div>
                     <div className="flex items-baseline justify-between gap-3">
-                      <Label htmlFor="username" className="text-sm font-semibold" style={{ color: ink }}>
+                      <Label
+                        htmlFor="username"
+                        className="text-sm font-semibold"
+                        style={{ color: ink }}
+                      >
                         Username
                       </Label>
                     </div>
-                    <div className="pm-field mt-2" style={inputShell(Boolean(fieldErrors.username))}>
+                    <div
+                      className="pm-field mt-2"
+                      style={inputShell(Boolean(fieldErrors.username))}
+                    >
                       <Input
                         id="username"
                         name="username"
@@ -235,7 +278,8 @@ export default function Screen() {
                         disabled={busy}
                         onChange={(e) => {
                           setUsername(e.target.value);
-                          if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
+                          if (fieldErrors.username)
+                            setFieldErrors((p) => ({ ...p, username: undefined }));
                           if (formError) setFormError(null);
                         }}
                         aria-invalid={fieldErrors.username ? "true" : "false"}
@@ -245,7 +289,11 @@ export default function Screen() {
                       />
                     </div>
                     {fieldErrors.username ? (
-                      <p id="username-error" className="mt-2 flex items-center gap-1.5 text-sm font-medium" style={{ color: dangerInk }}>
+                      <p
+                        id="username-error"
+                        className="mt-2 flex items-center gap-1.5 text-sm font-medium"
+                        style={{ color: dangerInk }}
+                      >
                         <X className="h-4 w-4 shrink-0" aria-hidden="true" />
                         {fieldErrors.username}
                       </p>
@@ -257,10 +305,17 @@ export default function Screen() {
                   </div>
 
                   <div>
-                    <Label htmlFor="password" className="text-sm font-semibold" style={{ color: ink }}>
+                    <Label
+                      htmlFor="password"
+                      className="text-sm font-semibold"
+                      style={{ color: ink }}
+                    >
                       Password
                     </Label>
-                    <div className="pm-field relative mt-2" style={inputShell(Boolean(fieldErrors.password))}>
+                    <div
+                      className="pm-field relative mt-2"
+                      style={inputShell(Boolean(fieldErrors.password))}
+                    >
                       <Input
                         id="password"
                         name="password"
@@ -270,7 +325,8 @@ export default function Screen() {
                         disabled={busy}
                         onChange={(e) => {
                           setPassword(e.target.value);
-                          if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+                          if (fieldErrors.password)
+                            setFieldErrors((p) => ({ ...p, password: undefined }));
                         }}
                         aria-invalid={fieldErrors.password ? "true" : "false"}
                         aria-describedby={fieldErrors.password ? "password-error" : undefined}
@@ -288,7 +344,11 @@ export default function Screen() {
                       </button>
                     </div>
                     {fieldErrors.password && (
-                      <p id="password-error" className="mt-2 flex items-center gap-1.5 text-sm font-medium" style={{ color: dangerInk }}>
+                      <p
+                        id="password-error"
+                        className="mt-2 flex items-center gap-1.5 text-sm font-medium"
+                        style={{ color: dangerInk }}
+                      >
                         <X className="h-4 w-4 shrink-0" aria-hidden="true" />
                         {fieldErrors.password}
                       </p>

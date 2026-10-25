@@ -47,9 +47,7 @@ def test_tampered_token_returns_401() -> None:
 
 
 def test_expired_token_returns_401() -> None:
-    expired_token = create_access_token(
-        uuid.uuid4(), "kevin", expires_delta=timedelta(seconds=-1)
-    )
+    expired_token = create_access_token(uuid.uuid4(), "kevin", expires_delta=timedelta(seconds=-1))
 
     response = probe_client.get("/probe", headers={"Authorization": f"Bearer {expired_token}"})
 

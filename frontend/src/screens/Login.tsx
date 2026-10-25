@@ -31,7 +31,12 @@ function Mark({ size, color, radius }: { size: number; color: string; radius: st
     <span
       aria-hidden="true"
       className="inline-block"
-      style={{ width: size, height: size, backgroundColor: color, borderRadius: `calc(${radius} * 1.4)` }}
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: color,
+        borderRadius: `calc(${radius} * 1.4)`,
+      }}
     />
   );
 }
@@ -230,11 +235,19 @@ export default function Screen() {
             <form className="mt-6" onSubmit={handleSubmit} noValidate>
               <div>
                 <div className="flex items-baseline justify-between gap-3">
-                  <Label htmlFor="username" className="text-[13px] font-semibold" style={{ color: ink }}>
+                  <Label
+                    htmlFor="username"
+                    className="text-[13px] font-semibold"
+                    style={{ color: ink }}
+                  >
                     Username
                   </Label>
                   {fieldErrors.username && (
-                    <span id="username-error" className="text-[12px] font-medium" style={{ color: accentInk }}>
+                    <span
+                      id="username-error"
+                      className="text-[12px] font-medium"
+                      style={{ color: accentInk }}
+                    >
                       {fieldErrors.username}
                     </span>
                   )}
@@ -255,7 +268,8 @@ export default function Screen() {
                     aria-describedby={fieldErrors.username ? "username-error" : undefined}
                     onChange={(e) => {
                       setUsername(e.target.value);
-                      if (fieldErrors.username) setFieldErrors((f) => ({ ...f, username: undefined }));
+                      if (fieldErrors.username)
+                        setFieldErrors((f) => ({ ...f, username: undefined }));
                     }}
                     className="pm-field"
                     style={fieldStyle(!!fieldErrors.username)}
@@ -265,11 +279,19 @@ export default function Screen() {
 
               <div className="mt-4">
                 <div className="flex items-baseline justify-between gap-3">
-                  <Label htmlFor="password" className="text-[13px] font-semibold" style={{ color: ink }}>
+                  <Label
+                    htmlFor="password"
+                    className="text-[13px] font-semibold"
+                    style={{ color: ink }}
+                  >
                     Password
                   </Label>
                   {fieldErrors.password && (
-                    <span id="password-error" className="text-[12px] font-medium" style={{ color: accentInk }}>
+                    <span
+                      id="password-error"
+                      className="text-[12px] font-medium"
+                      style={{ color: accentInk }}
+                    >
                       {fieldErrors.password}
                     </span>
                   )}
@@ -295,7 +317,8 @@ export default function Screen() {
                     }}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      if (fieldErrors.password) setFieldErrors((f) => ({ ...f, password: undefined }));
+                      if (fieldErrors.password)
+                        setFieldErrors((f) => ({ ...f, password: undefined }));
                     }}
                     className="pm-field"
                     style={{ ...fieldStyle(!!fieldErrors.password), paddingRight: "4.25rem" }}
@@ -312,7 +335,11 @@ export default function Screen() {
                   </button>
                 </div>
                 {capsOn && (
-                  <p id="caps-hint" className="pm-slide mt-2 text-[12px]" style={{ color: accentInk }}>
+                  <p
+                    id="caps-hint"
+                    className="pm-slide mt-2 text-[12px]"
+                    style={{ color: accentInk }}
+                  >
                     Caps Lock is on.
                   </p>
                 )}
@@ -410,7 +437,10 @@ export default function Screen() {
         <aside className="order-2 hidden lg:order-1 lg:block">
           <div className="flex items-center gap-3">
             <Mark size={42} color={brand.primaryColor} radius={brand.radius} />
-            <span className="text-[18px] font-semibold tracking-tight" style={{ fontFamily: brand.fontHeading }}>
+            <span
+              className="text-[18px] font-semibold tracking-tight"
+              style={{ fontFamily: brand.fontHeading }}
+            >
               Pocket Messenger
             </span>
           </div>

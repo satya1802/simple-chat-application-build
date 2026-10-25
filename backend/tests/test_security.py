@@ -5,7 +5,7 @@ covers the endpoints; this module covers the primitives they are built on.
 """
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
@@ -77,7 +77,7 @@ def test_get_current_user_rejects_tampered_token() -> None:
 
 
 def test_get_current_user_rejects_expired_token() -> None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload = {
         "sub": str(uuid.uuid4()),
         "username": "alice",
