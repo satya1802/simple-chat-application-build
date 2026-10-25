@@ -1,57 +1,45 @@
-// @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 
 import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
+import { apiFetch, ApiError } from "@/lib/api";
+import { setToken } from "@/lib/auth";
 
-const { Button, Input, Label, Checkbox, Separator } = UI;
-const { Check, X, Clock, ArrowRight, AlertCircle, CheckCircle } = Icons;
+const { Label, Checkbox } = UI;
+const { AlertCircle, CheckCircle, X, Clock, ArrowRight } = Icons;
 
-const UIX = typeof UI !== "undefined" && UI ? UI : {};
-const IconsX = typeof Icons !== "undefined" && Icons ? Icons : {};
+type FieldErrors = { username?: string; password?: string };
+type FormError = { title: string; body: string } | null;
+type Status = "idle" | "checking" | "success";
 
-const UIInput = UIX.Input || ((props) => React.createElement("input", props));
-const UILabel = UIX.Label || ((props) => React.createElement("label", props));
-const UICheckbox =
-  UIX.Checkbox || ((props) => React.createElement("input", { type: "checkbox", ...props }));
-const UIButton = UIX.Button || ((props) => React.createElement("button", props));
-const UISeparator = UIX.Separator || ((props) => React.createElement("hr", props));
+type TokenResponse = { access_token: string; token_type: string };
 
-const IconAlert = IconsX.AlertCircle || (() => null);
-const IconCheck = IconsX.CheckCircle || (() => null);
-const IconClose = IconsX.X || (() => null);
-const IconClock = IconsX.Clock || (() => null);
-const IconArrow = IconsX.ArrowRight || (() => null);
+function Dot({ delay }: { delay: string }) {
+  return (
+    <span
+      className="pm-dot inline-block h-1.5 w-1.5 rounded-full bg-white"
+      style={{ animationDelay: delay }}
+      aria-hidden="true"
+    />
+  );
+}
 
-// Seeded demo accounts for this learning build (passwords are bcrypt-hashed server side)
-const ACCOUNTS = [
-  { username: "alice", password: "wanderlust24", note: "12 conversations · last active Wed 09:14" },
-  { username: "raj", password: "testing123", note: "3 conversations · last active Tue 17:40" },
-  { username: "noor", password: "firstlight", note: "New account · no conversations yet" },
-];
-
-const PREVIEW_THREAD = [
-  {
-    role: "user",
-    content: "Help me write two lines to my landlord about the boiler.",
-    at: "09:12",
-  },
-  {
-    role: "assistant",
-    content:
-      "Try this: “Hi Sam — the boiler stopped heating water on Sunday. Could you send someone this week? I'm home after 4pm.”",
-    at: "09:12",
-  },
-  { role: "user", content: "Make it a bit firmer.", at: "09:14" },
-  {
-    role: "assistant",
-    content: "“Hi Sam — the boiler has been out since Sunday. Please book an engineer for this week.”",
-    at: "09:14",
-  },
-];
+function Mark({ size, color, radius }: { size: number; color: string; radius: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: color,
+        borderRadius: `calc(${radius} * 1.4)`,
+      }}
+    />
+  );
+}
 
 export default function Screen() {
   const navigate = useNavigate();
@@ -61,7 +49,6 @@ export default function Screen() {
   const primarySoft = `color-mix(in srgb, ${brand.primaryColor} 8%, white)`;
   const accentSoft = `color-mix(in srgb, ${brand.accentColor} 22%, white)`;
   const accentInk = `color-mix(in srgb, ${brand.accentColor} 42%, black)`;
-  const bubbleRadius = `calc(${brand.radius} * 2.5)`;
   const cardRadius = `calc(${brand.radius} * 2)`;
 
   const [username, setUsername] = React.useState("");
@@ -69,33 +56,21 @@ export default function Screen() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [remember, setRemember] = React.useState(true);
   const [capsOn, setCapsOn] = React.useState(false);
-  const [status, setStatus] = React.useState("idle"); // idle | checking | success
-  const [fieldErrors, setFieldErrors] = React.useState({});
-  const [formError, setFormError] = React.useState(null); // {kind, title, body}
-  const [attempts, setAttempts] = React.useState(0);
+  const [status, setStatus] = React.useState<Status>("idle");
+  const [fieldErrors, setFieldErrors] = React.useState<FieldErrors>({});
+  const [formError, setFormError] = React.useState<FormError>(null);
   const [sessionNotice, setSessionNotice] = React.useState(true);
-  const [failNext, setFailNext] = React.useState(false);
 
-  const timers = React.useRef([]);
-  const userRef = React.useRef(null);
-  const passRef = React.useRef(null);
-
-  React.useEffect(() => {
-    return () => timers.current.forEach((t) => clearTimeout(t));
-  }, []);
-
-  const later = (fn, ms) => {
-    const id = setTimeout(fn, ms);
-    timers.current.push(id);
-  };
+  const userRef = React.useRef<HTMLInputElement>(null);
+  const passRef = React.useRef<HTMLInputElement>(null);
 
   const busy = status !== "idle";
 
-  function handleSubmit(e) {
+  async function handleSubmit(e?: React.FormEvent) {
     if (e && e.preventDefault) e.preventDefault();
     if (busy) return;
 
-    const errs = {};
+    const errs: FieldErrors = {};
     if (!username.trim()) errs.username = "Enter your username";
     if (!password) errs.password = "Enter your password";
     setFieldErrors(errs);
@@ -109,49 +84,32 @@ export default function Screen() {
     setFormError(null);
     setStatus("checking");
 
-    later(() => {
-      if (failNext) {
-        setFailNext(false);
-        setStatus("idle");
-        setFormError({
-          kind: "service",
-          title: "We couldn't reach the chat service",
-          body:
-            "POST /auth/login timed out after 10 seconds. Nothing was sent and your details are still here — try again in a moment.",
-        });
-        return;
-      }
-
-      const match = ACCOUNTS.find(
-        (a) => a.username === username.trim().toLowerCase() && a.password === password
-      );
-
-      if (!match) {
-        setAttempts((n) => n + 1);
-        setStatus("idle");
-        setFormError({
-          kind: "auth",
-          title: "That username and password don't match",
-          body: "Check both and try again. Usernames are all lower-case.",
-        });
-        if (passRef.current) passRef.current.focus();
-        return;
-      }
-
+    try {
+      const result = await apiFetch<TokenResponse>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
+      setToken(result.access_token);
       setStatus("success");
-      later(() => navigate("chat"), 700);
-    }, 850);
+      navigate("chat");
+    } catch (err) {
+      setStatus("idle");
+      if (err instanceof ApiError && err.status === 401) {
+        setFormError({
+          title: "That username and password don't match",
+          body: "Check both and try again.",
+        });
+      } else {
+        setFormError({
+          title: "We couldn't reach the chat service",
+          body: "Something went wrong talking to the server. Nothing was sent and your details are still here -- try again in a moment.",
+        });
+      }
+      if (passRef.current) passRef.current.focus();
+    }
   }
 
-  function fill(account) {
-    setUsername(account.username);
-    setPassword(account.password);
-    setFieldErrors({});
-    setFormError(null);
-    if (passRef.current) passRef.current.focus();
-  }
-
-  const fieldStyle = (invalid) => ({
+  const fieldStyle = (invalid: boolean): React.CSSProperties => ({
     height: "3rem",
     width: "100%",
     borderRadius: brand.radius,
@@ -167,19 +125,15 @@ export default function Screen() {
     status === "checking"
       ? "Checking your details…"
       : status === "success"
-      ? "Signed in. Opening your conversations."
-      : formError
-      ? formError.title
-      : "";
+        ? "Signed in. Opening your conversations."
+        : formError
+          ? formError.title
+          : "";
 
   return (
     <div
       className="min-h-screen w-full px-4 py-8 sm:px-8 sm:py-12"
-      style={{
-        backgroundColor: brand.backgroundColor,
-        fontFamily: brand.fontBody,
-        color: ink,
-      }}
+      style={{ backgroundColor: brand.backgroundColor, fontFamily: brand.fontBody, color: ink }}
     >
       <style>{`
         @keyframes pm-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
@@ -196,7 +150,6 @@ export default function Screen() {
       `}</style>
 
       <div className="mx-auto grid w-full max-w-5xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
-        {/* ---------- Sign-in column (first in reading order) ---------- */}
         <div className="order-1 w-full lg:order-2">
           <div
             className="pm-rise mx-auto w-full max-w-[430px] p-6 sm:p-8"
@@ -207,7 +160,6 @@ export default function Screen() {
               boxShadow: "0 18px 40px -28px rgba(0,0,0,0.45)",
             }}
           >
-            {/* Mark — visible on phones where the side panel is hidden */}
             <div className="mb-6 flex items-center gap-2.5 lg:hidden">
               <Mark size={34} color={brand.primaryColor} radius={brand.radius} />
               <span
@@ -238,11 +190,11 @@ export default function Screen() {
                 }}
               >
                 <span style={{ color: brand.primaryColor }} className="mt-0.5 shrink-0">
-                  <IconClock className="h-4 w-4" aria-hidden="true" />
+                  <Clock className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <p className="flex-1 text-[13px] leading-relaxed" style={{ color: ink }}>
                   <span className="font-semibold">Session ended.</span> You were signed out after 30
-                  quiet minutes. Your chats are safe — sign in to carry on.
+                  quiet minutes. Your chats are safe -- sign in to carry on.
                 </p>
                 <button
                   type="button"
@@ -251,7 +203,7 @@ export default function Screen() {
                   className="pm-focus -mr-1 -mt-1 shrink-0 rounded p-1 transition-opacity hover:opacity-60"
                   style={{ color: inkSoft }}
                 >
-                  <IconClose className="h-4 w-4" aria-hidden="true" />
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -267,7 +219,7 @@ export default function Screen() {
                 }}
               >
                 <span style={{ color: accentInk }} className="mt-0.5 shrink-0">
-                  <IconAlert className="h-4 w-4" aria-hidden="true" />
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div className="flex-1">
                   <p className="text-[13px] font-semibold" style={{ color: accentInk }}>
@@ -276,12 +228,6 @@ export default function Screen() {
                   <p className="mt-1 text-[13px] leading-relaxed" style={{ color: accentInk }}>
                     {formError.body}
                   </p>
-                  {formError.kind === "auth" && attempts >= 2 && (
-                    <p className="mt-2 text-[12px] leading-relaxed" style={{ color: accentInk }}>
-                      Third try? There's no password reset in this build — ask whoever set up the
-                      demo to re-create your account.
-                    </p>
-                  )}
                 </div>
               </div>
             )}
@@ -289,13 +235,13 @@ export default function Screen() {
             <form className="mt-6" onSubmit={handleSubmit} noValidate>
               <div>
                 <div className="flex items-baseline justify-between gap-3">
-                  <UILabel
+                  <Label
                     htmlFor="username"
                     className="text-[13px] font-semibold"
                     style={{ color: ink }}
                   >
                     Username
-                  </UILabel>
+                  </Label>
                   {fieldErrors.username && (
                     <span
                       id="username-error"
@@ -307,7 +253,7 @@ export default function Screen() {
                   )}
                 </div>
                 <div className="mt-1.5">
-                  <UIInput
+                  <input
                     id="username"
                     name="username"
                     type="text"
@@ -333,13 +279,13 @@ export default function Screen() {
 
               <div className="mt-4">
                 <div className="flex items-baseline justify-between gap-3">
-                  <UILabel
+                  <Label
                     htmlFor="password"
                     className="text-[13px] font-semibold"
                     style={{ color: ink }}
                   >
                     Password
-                  </UILabel>
+                  </Label>
                   {fieldErrors.password && (
                     <span
                       id="password-error"
@@ -351,7 +297,7 @@ export default function Screen() {
                   )}
                 </div>
                 <div className="relative mt-1.5">
-                  <UIInput
+                  <input
                     id="password"
                     name="password"
                     ref={passRef}
@@ -362,10 +308,7 @@ export default function Screen() {
                     disabled={busy}
                     aria-invalid={fieldErrors.password ? true : undefined}
                     aria-describedby={
-                      [
-                        fieldErrors.password ? "password-error" : null,
-                        capsOn ? "caps-hint" : null,
-                      ]
+                      [fieldErrors.password ? "password-error" : null, capsOn ? "caps-hint" : null]
                         .filter(Boolean)
                         .join(" ") || undefined
                     }
@@ -392,32 +335,33 @@ export default function Screen() {
                   </button>
                 </div>
                 {capsOn && (
-                  <p id="caps-hint" className="pm-slide mt-2 text-[12px]" style={{ color: accentInk }}>
+                  <p
+                    id="caps-hint"
+                    className="pm-slide mt-2 text-[12px]"
+                    style={{ color: accentInk }}
+                  >
                     Caps Lock is on.
                   </p>
                 )}
               </div>
 
               <div className="mt-5 flex items-center gap-2.5">
-                <UICheckbox
+                <Checkbox
                   id="remember"
                   checked={remember}
                   disabled={busy}
-                  onChange={(e) =>
-                    setRemember(e && e.target ? !!e.target.checked : !remember)
-                  }
+                  onChange={(e) => setRemember(e.target.checked)}
                   style={{ accentColor: brand.primaryColor }}
                   className="pm-focus h-4 w-4"
                 />
-                <UILabel htmlFor="remember" className="text-[13px]" style={{ color: inkSoft }}>
+                <Label htmlFor="remember" className="text-[13px]" style={{ color: inkSoft }}>
                   Keep me signed in on this device
-                </UILabel>
+                </Label>
               </div>
 
-              <UIButton
+              <button
                 type="submit"
                 disabled={busy}
-                onClick={handleSubmit}
                 className="pm-focus mt-6 flex w-full items-center justify-center gap-2 text-[15px] font-semibold transition-transform active:scale-[0.99]"
                 style={{
                   height: "3rem",
@@ -445,17 +389,17 @@ export default function Screen() {
                 )}
                 {status === "success" && (
                   <>
-                    <IconCheck className="h-4 w-4" aria-hidden="true" />
+                    <CheckCircle className="h-4 w-4" aria-hidden="true" />
                     <span>Opening your chats</span>
                   </>
                 )}
                 {status === "idle" && (
                   <>
                     <span>Sign in</span>
-                    <IconArrow className="h-4 w-4" aria-hidden="true" />
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </>
                 )}
-              </UIButton>
+              </button>
 
               <p role="status" aria-live="polite" className="sr-only">
                 {statusLine}
@@ -463,14 +407,14 @@ export default function Screen() {
             </form>
 
             <div className="mt-6">
-              <UISeparator style={{ borderColor: line, backgroundColor: line }} />
+              <hr style={{ borderColor: line, backgroundColor: line, height: 1, border: "none" }} />
             </div>
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
               <p className="text-[14px]" style={{ color: inkSoft }}>
                 New here?
               </p>
-              <UIButton
+              <button
                 type="button"
                 onClick={() => navigate("signup")}
                 className="pm-focus text-[14px] font-semibold transition-colors"
@@ -485,87 +429,11 @@ export default function Screen() {
                 }}
               >
                 Create an account
-              </UIButton>
+              </button>
             </div>
-
-            {/* Tester shortcuts — this is a demo build, seeded accounts live here */}
-            <div
-              className="mt-6 p-4"
-              style={{
-                backgroundColor: brand.backgroundColor,
-                borderRadius: brand.radius,
-              }}
-            >
-              <h2
-                className="text-[11px] font-semibold uppercase tracking-[0.08em]"
-                style={{ color: inkSoft, fontFamily: brand.fontHeading }}
-              >
-                Seeded test accounts
-              </h2>
-              <ul className="mt-3 space-y-2">
-                {ACCOUNTS.map((a) => (
-                  <li key={a.username} className="flex items-center justify-between gap-3">
-                    <span className="min-w-0">
-                      <span
-                        className="block truncate text-[13px] font-semibold"
-                        style={{ color: ink, fontVariantNumeric: "tabular-nums" }}
-                      >
-                        {a.username}
-                      </span>
-                      <span
-                        className="block truncate text-[12px]"
-                        style={{ color: inkSoft, fontVariantNumeric: "tabular-nums" }}
-                      >
-                        {a.note}
-                      </span>
-                    </span>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => fill(a)}
-                      className="pm-focus shrink-0 rounded px-2 py-1 text-[12px] font-semibold underline-offset-4 hover:underline"
-                      style={{ color: brand.primaryColor, borderRadius: brand.radius }}
-                    >
-                      Fill
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${line}` }}>
-                <button
-                  type="button"
-                  onClick={() => setFailNext((v) => !v)}
-                  aria-pressed={failNext}
-                  className="pm-focus rounded text-[12px] font-medium underline-offset-4 hover:underline"
-                  style={{ color: failNext ? accentInk : inkSoft, borderRadius: brand.radius }}
-                >
-                  {failNext
-                    ? "Outage simulation armed — next sign-in will fail"
-                    : "Simulate a backend outage on the next sign-in"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mx-auto mt-5 flex w-full max-w-[430px] flex-wrap items-center justify-between gap-2">
-            <p className="text-[12px]" style={{ color: inkSoft, fontVariantNumeric: "tabular-nums" }}>
-              Pocket Messenger · build 0.4.2
-            </p>
-            <p
-              className="flex items-center gap-1.5 text-[12px]"
-              style={{ color: inkSoft, fontVariantNumeric: "tabular-nums" }}
-            >
-              <span
-                aria-hidden="true"
-                className="inline-block h-2 w-2 rounded-full"
-                style={{ backgroundColor: failNext ? brand.accentColor : brand.primaryColor }}
-              />
-              {failNext ? "Service: simulated outage" : "Service online · checked 10:42"}
-            </p>
           </div>
         </div>
 
-        {/* ---------- Brand / preview column ---------- */}
         <aside className="order-2 hidden lg:order-1 lg:block">
           <div className="flex items-center gap-3">
             <Mark size={42} color={brand.primaryColor} radius={brand.radius} />
@@ -584,88 +452,11 @@ export default function Screen() {
             Every chat, still waiting for you.
           </h2>
           <p className="mt-4 max-w-[42ch] text-[15px] leading-relaxed" style={{ color: inkSoft }}>
-            Messages are saved the moment they're sent, so a refresh — or signing in from your
-            phone on the bus — brings the whole thread back.
+            Messages are saved the moment they're sent, so a refresh -- or signing in from your
+            phone on the bus -- brings the whole thread back.
           </p>
-
-          <section
-            className="pm-rise mt-8 max-w-[420px] p-4"
-            style={{
-              backgroundColor: "white",
-              borderRadius: cardRadius,
-              border: `1px solid ${line}`,
-              boxShadow: "0 16px 36px -30px rgba(0,0,0,0.5)",
-            }}
-          >
-            <h3
-              className="px-1 text-[12px] font-semibold uppercase tracking-[0.08em]"
-              style={{ color: inkSoft, fontFamily: brand.fontHeading }}
-            >
-              Boiler email · yesterday
-            </h3>
-            <ul className="mt-3 space-y-2.5">
-              {PREVIEW_THREAD.map((m, i) => {
-                const mine = m.role === "user";
-                return (
-                  <li key={i} className={mine ? "flex justify-end" : "flex justify-start"}>
-                    <div className="max-w-[86%]">
-                      <p
-                        className="px-3.5 py-2.5 text-[13px] leading-relaxed"
-                        style={{
-                          backgroundColor: mine ? brand.primaryColor : brand.backgroundColor,
-                          color: mine ? "white" : ink,
-                          borderRadius: bubbleRadius,
-                          borderBottomRightRadius: mine ? brand.radius : bubbleRadius,
-                          borderBottomLeftRadius: mine ? bubbleRadius : brand.radius,
-                        }}
-                      >
-                        {m.content}
-                      </p>
-                      <p
-                        className={
-                          "mt-1 px-1 text-[11px] " + (mine ? "text-right" : "text-left")
-                        }
-                        style={{ color: inkSoft, fontVariantNumeric: "tabular-nums" }}
-                      >
-                        {mine ? "You" : "Assistant"} · {m.at}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
         </aside>
       </div>
     </div>
-  );
-}
-
-function Mark({ size, color, radius }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="flex shrink-0 items-end justify-center gap-[3px] pb-[30%]"
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: color,
-        borderRadius: `calc(${radius} * 1.6)`,
-        borderBottomLeftRadius: `calc(${radius} * 0.5)`,
-      }}
-    >
-      <span className="block h-[4px] w-[4px] rounded-full bg-white opacity-90" />
-      <span className="block h-[4px] w-[4px] rounded-full bg-white opacity-90" />
-      <span className="block h-[4px] w-[4px] rounded-full bg-white opacity-90" />
-    </span>
-  );
-}
-
-function Dot({ delay }) {
-  return (
-    <span
-      className="pm-dot block h-[5px] w-[5px] rounded-full bg-white"
-      style={{ animationDelay: delay }}
-    />
   );
 }
