@@ -41,14 +41,22 @@ def verify_password(password: str, password_hash: str) -> bool:
         return False
 
 
-def create_access_token(user_id: uuid.UUID, username: str) -> str:
-    """A PyJWT-encoded access token carrying the user's identity and an expiry."""
+def create_access_token(
+    user_id: uuid.UUID, username: str, expires_delta: timedelta | None = None
+) -> str:
+    """A PyJWT-encoded access token carrying the user's identity and an expiry.
+
+    `expires_delta` lets a caller (tests, mainly) mint an already-expired
+    token; it defaults to `JWT_EXPIRES_MINUTES` for every real caller.
+    """
     now = datetime.now(UTC)
     payload = {
         "sub": str(user_id),
         "username": username,
         "iat": now,
-        "exp": now + timedelta(minutes=JWT_EXPIRES_MINUTES),
+        "exp": now + (expires_delta if expires_delta is not None else timedelta(
+            minutes=JWT_EXPIRES_MINUTES
+        )),
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
@@ -63,8 +71,13 @@ class CurrentUser:
         self.username = username
 
 
+# Module-level singleton per ruff B008: a `Depends(...)` call does not belong
+# in a parameter default, it belongs assigned once here.
+_bearer_dependency = Depends(_bearer_scheme)
+
+
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),  # noqa: B008
+    credentials: HTTPAuthorizationCredentials | None = _bearer_dependency,
 ) -> CurrentUser:
     """FastAPI dependency: 401 on missing, malformed, tampered or expired
     bearer tokens. Performs no read or write -- just decodes the claims."""

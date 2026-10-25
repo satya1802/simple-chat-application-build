@@ -19,24 +19,31 @@ from app.security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-_USERNAME_TAKEN = HTTPException(
-    status_code=status.HTTP_409_CONFLICT,
-    detail={"code": "username_taken", "message": "That username is already taken."},
-)
-
 _INVALID_CREDENTIALS = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail={"code": "invalid_credentials", "message": "Incorrect username or password."},
 )
 
 
+def _username_taken_error(username: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail={
+            "code": "username_taken",
+            "message": f"The username '{username}' is already taken.",
+            "username": username,
+        },
+    )
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(
-    payload: RegisterRequest, db: Session = Depends(get_db)  # noqa: B008
+    payload: RegisterRequest,
+    db: Session = Depends(get_db),  # noqa: B008
 ) -> TokenResponse:
     existing = db.query(User).filter(User.username == payload.username).first()
     if existing is not None:
-        raise _USERNAME_TAKEN
+        raise _username_taken_error(payload.username)
 
     user = User(username=payload.username, password_hash=hash_password(payload.password))
     db.add(user)
@@ -47,7 +54,7 @@ async def register(
         # uniqueness constraint catches it even though our own check above
         # did not.
         db.rollback()
-        raise _USERNAME_TAKEN from None
+        raise _username_taken_error(payload.username) from None
     db.refresh(user)
 
     token = create_access_token(user.id, user.username)
@@ -56,7 +63,8 @@ async def register(
 
 @router.post("/login", response_model=TokenResponse)
 async def login(
-    payload: LoginRequest, db: Session = Depends(get_db)  # noqa: B008
+    payload: LoginRequest,
+    db: Session = Depends(get_db),  # noqa: B008
 ) -> TokenResponse:
     user = db.query(User).filter(User.username == payload.username).first()
     if user is None or not verify_password(payload.password, user.password_hash):

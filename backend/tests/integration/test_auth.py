@@ -7,6 +7,7 @@ end to end, without touching the file-backed `app.db` the dev server uses.
 
 import jwt
 import pytest
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -15,7 +16,7 @@ from sqlalchemy.pool import StaticPool
 from app.database import Base, get_db
 from app.main import app
 from app.models import User
-from app.security import JWT_ALGORITHM, JWT_SECRET
+from app.security import JWT_ALGORITHM, JWT_SECRET, get_current_user
 
 _engine = create_engine(
     "sqlite://",
@@ -23,6 +24,10 @@ _engine = create_engine(
     poolclass=StaticPool,
 )
 _TestingSessionLocal = sessionmaker(bind=_engine, autoflush=False, expire_on_commit=False)
+
+# Module-level singleton, per ruff B008: a `Depends(...)` call belongs outside
+# the parameter default, not inlined there.
+_current_user_dependency = Depends(get_current_user)
 
 
 @pytest.fixture(autouse=True)
@@ -155,15 +160,11 @@ def test_ac009_wrong_password_returns_same_generic_401() -> None:
     assert unknown.json()["detail"] == wrong.json()["detail"]
 
 
-def test_bearer_protected_dependency_rejects_tampered_token(monkeypatch) -> None:
-    from fastapi import Depends, FastAPI
-
-    from app.security import get_current_user
-
+def test_bearer_protected_dependency_rejects_tampered_token() -> None:
     probe = FastAPI()
 
     @probe.get("/probe")
-    def _probe(user=Depends(get_current_user)):
+    def _probe(user=_current_user_dependency):
         return {"id": str(user.id)}
 
     probe_client = TestClient(probe)
