@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 Simple Chat Application - Build Prompt Build a simple full-stack chat application with username and password login.  Show only the Login page before authentication.  After successful login, show the Chat Dashboard with sidebar, chat history, message input, Send button, and Logout.  Store users and chat history in PostgreSQL.  Chat history must persist after refresh and re-login.  Hash passwords securely using bcrypt.  Logout should return the user to the Login page.  Use React + TypeScript for frontend and FastAPI (Python) for backend.  Keep the UI simple, clean, and responsive.
 
-**Documentation version:** v6
+**Documentation version:** v7
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -15,7 +15,7 @@ Simple Chat Application - Build Prompt Build a simple full-stack chat applicatio
 |---|---|
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 12 entries |
-| [Development](development/README.md) | 11 entries |
+| [Development](development/README.md) | 16 entries |
 | [Testing](testing/README.md) | 0 entries |
 | [Deployment](deployment/README.md) | 0 entries |
 | [Maintenance](maintenance/README.md) | 0 entries |
@@ -26,12 +26,12 @@ Simple Chat Application - Build Prompt Build a simple full-stack chat applicatio
 | [Developer guide](development/developer-guide.md) | generated |
 | [API reference](development/api-reference.md) | 1 route |
 | [Test report](testing/test-report.md) | not run yet |
-| [Test cases](testing/test-cases.md) | 117 test cases |
+| [Tests](testing/test-cases.md) | 68 tests |
 | [Deployment guide](deployment/deployment-guide.md) | not deployed yet |
 | [Runbook](deployment/runbook.md) | not deployed yet |
 | [Release notes](deployment/release-notes.md) | 0 releases |
 | [Traceability matrix](traceability-matrix.md) | 22 requirements |
-| [Changelog](CHANGELOG.md) | 6 versions |
+| [Changelog](CHANGELOG.md) | 7 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -43,22 +43,14 @@ Simple Chat Application - Build Prompt Build a simple full-stack chat applicatio
 
 ### Development
 
-- Sprints 1, 2 and 3 each commit more points than their stated 20-point capacity (21, 24, 22 respectively) — see individual sprint entries for the discrepancy.
-- Committed points (21) exceed stated sprint capacity (20) by 1 — not flagged as resolved in the input.
-- Only 5 of this sprint's 6 stories (missing US-005) appear in the development run status; see DEVRUN-SPRINT1.
-- Committed points (24) exceed stated sprint capacity (20) by 4.
-- No development run data exists for any Sprint 2 story; build status is entirely undocumented.
-- Committed points (22) exceed stated sprint capacity (20) by 2.
-- No development run data exists for any Sprint 3 story; build status is entirely undocumented.
-- No development run data exists for any Sprint 4 story; build status is entirely undocumented.
-- No root-cause or error detail was provided for the overall 'failed' run status.
-- US-005 (Chat endpoints reject unauthenticated requests) is in Sprint 1/EPIC-001 scope but is absent from the run output — unclear if it was attempted.
-- Tickets marked 'planned' (US-001, US-004) have no commit, so it is unconfirmed whether any implementation work exists beyond planning.
-- Reason for skipping US-002, US-003, US-006 is not stated.
-- No commit or code artifact exists for this ticket; actual implementation progress beyond 'planned' is unknown.
-- No reason given for skipping this security-critical ticket.
-- Password hashing is a stated core requirement (bcrypt) and remains unimplemented per this run.
-- No reason given for skipping.
-- Login is foundational to the whole application; its absence blocks all downstream authenticated functionality.
-- No commit or code artifact exists; implementation progress beyond 'planned' is unknown.
+- Input does not state which backlog items/tasks are explicitly assigned to each sprint -- sprint-to-story mapping below is inferred only loosely from epic order and sprint goal wording, not confirmed by the input.
+- Exact item list for this sprint is not explicitly given; inferred from goal text matching story titles.
+- Exact item list for this sprint is not explicitly given; inferred from goal text.
+- No development run entry reports status for any item in this sprint.
+- Discrepancy: run status is labeled 'completed' but only 5 of 22 planned stories (22.7%) have reported ticket/commit evidence -- unclear whether 'completed' refers to the whole plan or only to Sprint 1.
+- US-001, US-002, and US-003 share the same commit hash, and US-004 and US-006 share a second commit hash -- input does not clarify whether these are legitimately combined commits or a reporting duplication; flagging for confirmation.
+- No test or QA confirmation provided for this ticket in the input.
+- Input marks the story delivered but does not separately confirm the QA task (test per-user salting and response safety) was executed or passed.
+- No ticket status or commit evidence exists for any of these 17 stories despite the run being reported 'completed' -- build/delivery status for the Chat Dashboard, AI reply loop, conversation persistence, cross-user security, responsive layout, and setup documentation is currently undocumented.
+- US-005 in particular is thematically part of the auth-gating work delivered alongside US-004/US-006 but was not included in the delivered ticket list -- confirm whether it was actually completed or missed in reporting.
 <!-- sdlc:auto:end open-gaps -->

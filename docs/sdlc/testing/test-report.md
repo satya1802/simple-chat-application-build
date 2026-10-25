@@ -13,6 +13,12 @@ _No unit-test run yet._
 <!-- sdlc:auto:start dev-checks -->
 ### Sprint 1
 
+| Step | Status | Ticket | Finished |
+|---|---|---|---|
+| run_checks | succeeded | — | 2026-10-25 |
+
+### Sprint 1
+
 _No test steps recorded._
 
 ### Sprint 1

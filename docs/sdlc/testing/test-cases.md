@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-117 test cases · 117 approved · 0 draft · Passed 0 · Failed 0 · Skipped 0 · Not automated 0 · Not run 117
+68 tests · Passed 56 · Failed 0 · Skipped 0 · Not run 12
 
-Acceptance criteria covered: 64/64 · passing: 0/64 · No E2E run yet
+Acceptance criteria covered: 14/64 · passing: 3/64
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start cases -->
@@ -1941,3 +1941,90 @@ Acceptance criteria covered: 64/64 · passing: 0/64 · No E2E run yet
 
 **Expected result:** The database contains tables for users, conversations and messages as described in the README
 <!-- sdlc:auto:end cases -->
+
+<!-- sdlc:auto:start tests -->
+## Sprint 1: Sprint 1 - Auth Foundation
+
+### US-001: Create an account by self-registration
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-007 | test_ac007_correct_password_returns_a_decodable_jwt | Unit | Passed | `backend/tests/test_auth_login.py` |
+| AC-007 | test_ac007_wrong_password_returns_401 | Unit | Passed | `backend/tests/test_auth_login.py` |
+| AC-009 | test_ac009_unknown_username_and_wrong_password_give_identical_responses | Unit | Passed | `backend/tests/test_auth_login.py` |
+| AC-005 | test_ac005_stored_value_is_a_bcrypt_hash_and_plaintext_appears_nowhere | Unit | Passed | `backend/tests/test_auth_password_storage.py` |
+| AC-006 | test_ac006_two_users_with_identical_passwords_get_different_hashes | Unit | Passed | `backend/tests/test_auth_password_storage.py` |
+| — | test_expired_token_returns_401 | Unit | Passed | `backend/tests/test_auth_protected_dependency.py` |
+| — | test_malformed_token_returns_401 | Unit | Passed | `backend/tests/test_auth_protected_dependency.py` |
+| — | test_missing_token_returns_401 | Unit | Passed | `backend/tests/test_auth_protected_dependency.py` |
+| — | test_tampered_token_returns_401 | Unit | Passed | `backend/tests/test_auth_protected_dependency.py` |
+| AC-002 | test_ac002_registering_an_unused_username_creates_one_row_and_can_log_in | Unit | Passed | `backend/tests/test_auth_register.py` |
+| AC-003 | test_ac003_registering_an_existing_username_is_rejected_and_row_count_unchanged | Unit | Passed | `backend/tests/test_auth_register.py` |
+| AC-004 | test_ac004_registering_with_empty_password_is_rejected_and_creates_no_row | Unit | Passed | `backend/tests/test_auth_register.py` |
+| AC-004 | test_ac004_registering_with_empty_username_is_rejected_and_creates_no_row | Unit | Passed | `backend/tests/test_auth_register.py` |
+| — | test_auth_routes_are_registered | Unit | Passed | `backend/tests/test_scaffolded_routes.py` |
+| — | test_conversation_routes_are_registered | Unit | Passed | `backend/tests/test_scaffolded_routes.py` |
+| — | test_conversation_stub_round_trip | Unit | Passed | `backend/tests/test_scaffolded_routes.py` |
+| AC-006 | test_ac006_identical_passwords_get_different_hashes | Unit | Passed | `backend/tests/test_security.py` |
+| AC-007, AC-008 | test_ac007_ac008_token_carries_identity_claim_and_expiry | Unit | Passed | `backend/tests/test_security.py` |
+| — | test_get_current_user_accepts_valid_token | Unit | Passed | `backend/tests/test_security.py` |
+| — | test_get_current_user_rejects_expired_token | Unit | Passed | `backend/tests/test_security.py` |
+| — | test_get_current_user_rejects_malformed_token | Unit | Passed | `backend/tests/test_security.py` |
+| — | test_get_current_user_rejects_missing_token | Unit | Passed | `backend/tests/test_security.py` |
+| — | test_get_current_user_rejects_tampered_token | Unit | Passed | `backend/tests/test_security.py` |
+| — | test_hash_password_rejects_wrong_password_on_verify | Unit | Passed | `backend/tests/test_security.py` |
+| — | auth helper > notifies subscribers when the token changes | Unit | Passed | `frontend/src/lib/auth.test.ts` |
+| — | auth helper > stores, reads and clears the token | Unit | Passed | `frontend/src/lib/auth.test.ts` |
+| AC-004 | Login screen > [AC-004-like] shows inline validation and sends no request when fields are empty | Unit | Passed | `frontend/src/screens/Login.test.tsx` |
+| AC-008 | Login screen > [AC-008] submits to POST /auth/login and stores the token on success | Unit | Passed | `frontend/src/screens/Login.test.tsx` |
+| AC-009 | Login screen > [AC-009] shows one generic inline error on failed login and stores no token | Unit | Passed | `frontend/src/screens/Login.test.tsx` |
+| AC-010 | Login screen > [AC-010] offers no password reset or forgotten-password link | Unit | Passed | `frontend/src/screens/Login.test.tsx` |
+| AC-012 | Login screen > [AC-012] offers a Sign-up link and no other navigation | Unit | Passed | `frontend/src/screens/Login.test.tsx` |
+| AC-001 | Signup screen > [AC-001] asks only for a username and a password, no email field | Unit | Passed | `frontend/src/screens/Signup.test.tsx` |
+| AC-002 | Signup screen > [AC-002] submits to POST /auth/register and signs the user in on success | Unit | Passed | `frontend/src/screens/Signup.test.tsx` |
+| AC-003 | Signup screen > [AC-003] shows a clear inline duplicate-username error with the username still populated | Unit | Passed | `frontend/src/screens/Signup.test.tsx` |
+| AC-004 | Signup screen > [AC-004] shows inline validation naming the missing field and sends no request when empty | Unit | Passed | `frontend/src/screens/Signup.test.tsx` |
+| AC-002 | test_ac002_register_creates_usable_account_immediately | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-003 | test_ac003_duplicate_username_returns_409_and_creates_no_second_row | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-004 | test_ac004_empty_password_returns_422_naming_field | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-004 | test_ac004_empty_username_returns_422_naming_field | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-005 | test_ac005_registration_response_never_contains_plain_password | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-006 | test_ac006_two_users_same_password_get_different_hashes | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-007, AC-008 | test_ac007_ac008_login_returns_pyjwt_token_with_identity_and_expiry | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-009 | test_ac009_unknown_username_returns_generic_401 | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| AC-009 | test_ac009_wrong_password_returns_same_generic_401 | Integration | Passed | `backend/tests/integration/test_auth.py` |
+| — | test_bearer_protected_dependency_rejects_tampered_token | Integration | Passed | `backend/tests/integration/test_auth.py` |
+
+### US-004: Only the Login page is reachable before authentication
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-011 | App > [AC-011] shows Login, with no sidebar or chat content, when the Chat Dashboard URL is opened with no token | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-012 | App > [AC-012] renders Signup with no Shell sidebar while signed out | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-017 | App > [AC-017] returns to Login and renders no chat content once the token has been cleared | Unit | Passed | `frontend/src/App.test.tsx` |
+| — | App > lets a signed-in user reach and stay on the Chat Dashboard while the token is valid | Unit | Passed | `frontend/src/App.test.tsx` |
+| — | App > opens on Login, with no menu around it | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-005 | authFetch > [AC-005] discards the stored token when the API responds 401 | Unit | Passed | `frontend/src/lib/authFetch.test.ts` |
+| — | authFetch > leaves the token alone on a non-401 error | Unit | Passed | `frontend/src/lib/authFetch.test.ts` |
+| — | authFetch > leaves the token alone on a successful call | Unit | Passed | `frontend/src/lib/authFetch.test.ts` |
+| AC-016 | Chat screen > [AC-016] shows a Logout control that discards the token and routes to Login | Unit | Passed | `frontend/src/screens/Chat.test.tsx` |
+| AC-001 | [AC-001] the Sign-up link opens a registration form with username and password fields only, no email | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-002 | [AC-002] registering a fresh username signs in immediately, and the same credentials log in again later | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-003 | [AC-003] registering an existing username shows an inline 'already taken' error, keeps the username field filled, and creates no second account | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-004 | [AC-004] submitting signup with an empty password shows an inline message naming the password field | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-004 | [AC-004] submitting signup with an empty username shows an inline message naming the username field | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-008 | [AC-008] correct credentials reach the Chat Dashboard | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-009 | [AC-009] a wrong password shows one generic inline error and stays on Login | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-010, AC-012 | [AC-010][AC-012] Login shows the Sign-up link, no password-reset link, and no other navigation | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-011 | [AC-011] visiting app root while signed out lands on Login with no app chrome | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-011 | [AC-011] visiting the Chat Dashboard URL directly while signed out lands on Login with no app chrome | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+| AC-016, AC-017 | [AC-016][AC-017] Logout returns to Login, and Back / a direct Chat URL do not reveal prior conversation content | E2E | Not run yet | `frontend/e2e/auth-journey.spec.ts` |
+
+## Project setup
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| — | test_health_reports_ok | Unit | Passed | `backend/tests/test_health.py` |
+| — | test_the_openapi_document_builds | Unit | Passed | `backend/tests/test_health.py` |
+| — | the app loads | E2E | Not run yet | `frontend/e2e/example.spec.ts` |
+<!-- sdlc:auto:end tests -->
