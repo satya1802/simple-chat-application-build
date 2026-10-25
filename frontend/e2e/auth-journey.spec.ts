@@ -75,7 +75,9 @@ test.describe("Registration flow", () => {
     const password = "Correct-Horse-1";
 
     await registerViaUi(page, username, password);
-    await expect(page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") }),
+    ).toBeVisible();
     await page.getByRole("button", { name: /open my chats/i }).click();
     await expect(page).toHaveURL(/\/chat$/);
 
@@ -94,7 +96,9 @@ test.describe("Registration flow", () => {
     const secondPassword = "Second-Password-2";
 
     await registerViaUi(page, username, firstPassword);
-    await expect(page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") }),
+    ).toBeVisible();
 
     // Attempt to register the same username again with a different password.
     await registerViaUi(page, username, secondPassword);
@@ -139,7 +143,9 @@ test.describe("Login flow", () => {
     const username = uniqueUsername("goodlogin");
     const password = "Good-Password-1";
     await registerViaUi(page, username, password);
-    await expect(page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") }),
+    ).toBeVisible();
     await page.getByRole("button", { name: /^logout$/i }).click();
 
     await loginViaUi(page, username, password);
@@ -152,7 +158,9 @@ test.describe("Login flow", () => {
     const username = uniqueUsername("wrongpass");
     const password = "Right-Password-1";
     await registerViaUi(page, username, password);
-    await expect(page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") }),
+    ).toBeVisible();
     await page.getByRole("button", { name: /^logout$/i }).click();
 
     await loginViaUi(page, username, "totally-wrong-password");
@@ -170,7 +178,9 @@ test.describe("Logout and history exposure", () => {
     const username = uniqueUsername("logout");
     const password = "Logout-Password-1";
     await registerViaUi(page, username, password);
-    await expect(page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: new RegExp(`you're in, @${username}`, "i") }),
+    ).toBeVisible();
     await page.getByRole("button", { name: /open my chats/i }).click();
     await expect(page).toHaveURL(/\/chat$/);
 

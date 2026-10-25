@@ -1,5 +1,12 @@
 import React from "react";
-import { NavLink, Navigate, Outlet, Route, Routes, useNavigate as useRouterNavigate } from "react-router-dom";
+import {
+  NavLink,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useNavigate as useRouterNavigate,
+} from "react-router-dom";
 
 import Login from "@/screens/Login";
 import Signup from "@/screens/Signup";
