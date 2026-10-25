@@ -13,10 +13,25 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import models  # noqa: F401 -- imported so the tables register before create_all
 from app.database import Base, engine
+from app.routers import auth, conversations
+
+# Kept as one implicitly-concatenated literal, wrapped to the line-length ruff
+# enforces, rather than the single long line the generator first produced.
+_DESCRIPTION = (
+    "Simple Chat Application - Build Prompt Build a simple full-stack chat "
+    "application with username and password login.  Show only the Login page "
+    "before authentication.  After successful login, show the Chat Dashboard "
+    "with sidebar, chat history, message input, Send button, and Logout.  "
+    "Store users and chat history in PostgreSQL.  Chat history must persist "
+    "after refresh and re-login.  Hash passwords securely using bcrypt.  "
+    "Logout should return the user to the Login page.  Use React + TypeScript "
+    "for frontend and FastAPI (Python) for backend.  Keep the UI simple, "
+    "clean, and responsive."
+)
 
 app = FastAPI(
     title="Simple Chat Application - Build",
-    description="Simple Chat Application - Build Prompt Build a simple full-stack chat application with username and password login. \u007f Show only the Login page before authentication. \u007f After successful login, show the Chat Dashboard with sidebar, chat history, message input, Send button, and Logout. \u007f Store users and chat history in PostgreSQL. \u007f Chat history must persist after refresh and re-login. \u007f Hash passwords securely using bcrypt. \u007f Logout should return the user to the Login page. \u007f Use React + TypeScript for frontend and FastAPI (Python) for backend. \u007f Keep the UI simple, clean, and responsive.",
+    description=_DESCRIPTION,
     version="0.1.0",
 )
 
@@ -37,6 +52,9 @@ app.add_middleware(
 # The scaffold ships no migrations, so the tables are created from the models on
 # startup. Replace this with Alembic before anything holds data worth keeping.
 Base.metadata.create_all(bind=engine)
+
+app.include_router(auth.router)
+app.include_router(conversations.router)
 
 
 @app.get("/health")

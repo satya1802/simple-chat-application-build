@@ -1,0 +1,40 @@
+{
+  "key": {
+    "app_design_id": "94947095-c9f2-482c-80fc-8fac8365ca4a",
+    "app_design_version": 1,
+    "architecture_document_id": "b99aab0c-caf6-4971-8e6b-646c46006fad",
+    "architecture_version": 1
+  },
+  "outcome": "prepared",
+  "packages": [
+    {
+      "ecosystem": "pypi",
+      "installed_version": "3.37.0",
+      "name": "openai",
+      "status": "installed",
+      "version": ">=1.0.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "5.0.0",
+      "name": "bcrypt",
+      "status": "installed",
+      "version": ">=4.0.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "2.15.1",
+      "name": "PyJWT",
+      "status": "installed",
+      "version": ">=2.8.0"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "react-router-dom",
+      "status": "skipped",
+      "version": ">=6.0.0"
+    }
+  ],
+  "prepared_by_run": "54235903-5f62-4845-abeb-2cb071c977f3"
+}
