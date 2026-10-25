@@ -6,9 +6,22 @@ import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
+import { clearToken } from "@/lib/auth";
 
 const { Button, Input, Label } = UI;
-const { Plus, Search, Check, X, Clock, Trash, ArrowLeft, ArrowRight, AlertCircle, CheckCircle, MoreHorizontal } = Icons;
+const {
+  Plus,
+  Search,
+  Check,
+  X,
+  Clock,
+  Trash,
+  ArrowLeft,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle,
+  MoreHorizontal,
+} = Icons;
 
 const NOW = Date.now();
 const ago = (mins) => new Date(NOW - mins * 60000).toISOString();
@@ -134,13 +147,14 @@ const SEED_CONVERSATIONS = [
         id: "m-4402",
         role: "assistant",
         content:
-          "Start from `python:3.12-slim`, copy requirements, `pip install --no-cache-dir -r requirements.txt`, copy the app, then `CMD [\"uvicorn\", \"app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8080\"]`.\n\nFly expects the process to bind 0.0.0.0 and to match `internal_port` in fly.toml — 8080 is the default there.",
+          'Start from `python:3.12-slim`, copy requirements, `pip install --no-cache-dir -r requirements.txt`, copy the app, then `CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]`.\n\nFly expects the process to bind 0.0.0.0 and to match `internal_port` in fly.toml — 8080 is the default there.',
         created_at: ago(1188),
       },
       {
         id: "m-4403",
         role: "user",
-        content: "And how do I give it the DATABASE_URL and OPENAI_API_KEY without baking them into the image?",
+        content:
+          "And how do I give it the DATABASE_URL and OPENAI_API_KEY without baking them into the image?",
         created_at: ago(1143),
       },
       {
@@ -168,7 +182,7 @@ const SEED_CONVERSATIONS = [
         id: "m-4202",
         role: "assistant",
         content:
-          "Warm but grown-up: Leash, Longway, Rove, Pavement, Goodwalk, Barkly, Halfhour, Streetside.\n\nMy pick is Goodwalk — it says the product and the promise in one word, and the domain language writes itself (\"book a good walk\").",
+          'Warm but grown-up: Leash, Longway, Rove, Pavement, Goodwalk, Barkly, Halfhour, Streetside.\n\nMy pick is Goodwalk — it says the product and the promise in one word, and the domain language writes itself ("book a good walk").',
         created_at: ago(2888),
       },
       {
@@ -180,7 +194,8 @@ const SEED_CONVERSATIONS = [
       {
         id: "m-4204",
         role: "assistant",
-        content: "Walkwell, Goodloop, Wellwalk, Roundblock. Walkwell keeps the same cadence and is far less contested.",
+        content:
+          "Walkwell, Goodloop, Wellwalk, Roundblock. Walkwell keeps the same cadence and is far less contested.",
         created_at: ago(2880),
       },
     ],
@@ -245,38 +260,31 @@ const SEED_CONVERSATIONS = [
 const REPLY_RULES = [
   {
     test: /jwt|token|expire|session|auth/i,
-    text:
-      "Keep it simple: sign the token with a short expiry (30–60 minutes is plenty for a demo) and store it in memory on the React side, falling back to sessionStorage so a refresh doesn't log you out.\n\nThen add one interceptor: any 401 from a chat endpoint clears the token and sends the user back to the Login page. That single rule covers expired, tampered and missing tokens without special-casing each one.",
+    text: "Keep it simple: sign the token with a short expiry (30–60 minutes is plenty for a demo) and store it in memory on the React side, falling back to sessionStorage so a refresh doesn't log you out.\n\nThen add one interceptor: any 401 from a chat endpoint clears the token and sends the user back to the Login page. That single rule covers expired, tampered and missing tokens without special-casing each one.",
   },
   {
     test: /postgres|sql|index|query|migration|database/i,
-    text:
-      "For this schema you really only need two indexes: `(conversation_id, created_at)` on messages and `(user_id, updated_at DESC)` on conversations. Everything the dashboard does is one of those two shapes.\n\nAdd them in the same migration that creates the tables so your local and deployed databases never drift.",
+    text: "For this schema you really only need two indexes: `(conversation_id, created_at)` on messages and `(user_id, updated_at DESC)` on conversations. Everything the dashboard does is one of those two shapes.\n\nAdd them in the same migration that creates the tables so your local and deployed databases never drift.",
   },
   {
     test: /bcrypt|password|hash|salt|security/i,
-    text:
-      "bcrypt with a cost of 12 is the right default here — slow enough to matter, fast enough that login still feels instant.\n\nHash on the way in, compare with `checkpw` on the way out, and never log the plain value, not even at debug level. The salt rides inside the hash string, so a single `password_hash` column is all you store.",
+    text: "bcrypt with a cost of 12 is the right default here — slow enough to matter, fast enough that login still feels instant.\n\nHash on the way in, compare with `checkpw` on the way out, and never log the plain value, not even at debug level. The salt rides inside the hash string, so a single `password_hash` column is all you store.",
   },
   {
     test: /react|component|state|hook|typescript/i,
-    text:
-      "Hold the message list in one piece of state keyed by conversation id, and treat the server as the source of truth after each send.\n\nOptimistically append your own message so the thread feels instant, then reconcile when the reply lands. If the call fails, mark that turn as failed rather than removing it — people hate watching their own words vanish.",
+    text: "Hold the message list in one piece of state keyed by conversation id, and treat the server as the source of truth after each send.\n\nOptimistically append your own message so the thread feels instant, then reconcile when the reply lands. If the call fails, mark that turn as failed rather than removing it — people hate watching their own words vanish.",
   },
   {
     test: /recipe|dinner|meal|cook|eat/i,
-    text:
-      "Twenty minutes means one pan and something already cooked in a tin. Try white beans warmed with garlic, lemon and a lot of olive oil, spooned over toast with whatever green is in the fridge.\n\nIt scales to four without taking any longer, which is the real test of a weeknight recipe.",
+    text: "Twenty minutes means one pan and something already cooked in a tin. Try white beans warmed with garlic, lemon and a lot of olive oil, spooned over toast with whatever green is in the fridge.\n\nIt scales to four without taking any longer, which is the real test of a weeknight recipe.",
   },
   {
     test: /trip|travel|flight|holiday|city/i,
-    text:
-      "Three days is two neighbourhoods and one day trip — any more and you spend the time in transit.\n\nBook the day trip for the middle day so a weather forecast can still move it, and leave the last morning completely unplanned. That's usually the bit people remember.",
+    text: "Three days is two neighbourhoods and one day trip — any more and you spend the time in transit.\n\nBook the day trip for the middle day so a weather forecast can still move it, and leave the last morning completely unplanned. That's usually the bit people remember.",
   },
   {
     test: /name|idea|brainstorm|title/i,
-    text:
-      "Here are five, shortest first: Ledge, Hopper, Marlow, Sidecar, Everyday.\n\nSay each one out loud as \"open Ledge\" or \"open Hopper\" — the one that doesn't make you hesitate is the one that will survive a year of saying it in meetings.",
+    text: 'Here are five, shortest first: Ledge, Hopper, Marlow, Sidecar, Everyday.\n\nSay each one out loud as "open Ledge" or "open Hopper" — the one that doesn\'t make you hesitate is the one that will survive a year of saying it in meetings.',
   },
 ];
 
@@ -285,10 +293,10 @@ function craftReply(text) {
   if (rule) return rule.text;
   const topic = text.trim().replace(/\s+/g, " ").slice(0, 60);
   return (
-    'Here\'s how I\'d approach "' +
+    "Here's how I'd approach \"" +
     topic +
     (text.trim().length > 60 ? "…" : "") +
-    '":\n\nStart by writing down the one outcome that would make this a success — not the steps, the outcome. Then work backwards and keep only the steps that move you toward it.\n\nIf you tell me which part you\'re stuck on, I can go deeper on just that piece.'
+    "\":\n\nStart by writing down the one outcome that would make this a success — not the steps, the outcome. Then work backwards and keep only the steps that move you toward it.\n\nIf you tell me which part you're stuck on, I can go deeper on just that piece."
   );
 }
 
@@ -298,12 +306,18 @@ function titleFrom(text) {
 }
 
 function clockOf(iso) {
-  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  return new Date(iso).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }
 
 function isSameDay(a, b) {
   return (
-    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
   );
 }
 
@@ -341,6 +355,12 @@ const STARTERS = [
 
 export default function Screen() {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearToken();
+    navigate("login");
+  };
+
   const T = {
     ink: `color-mix(in srgb, ${brand.neutralColor} 35%, black)`,
     body: `color-mix(in srgb, ${brand.neutralColor} 75%, black)`,
@@ -395,14 +415,14 @@ export default function Screen() {
   }, [confirmId]);
 
   const sorted = [...conversations].sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
   );
   const q = query.trim().toLowerCase();
   const visible = q
     ? sorted.filter(
         (c) =>
           c.title.toLowerCase().includes(q) ||
-          c.messages.some((m) => m.content.toLowerCase().includes(q))
+          c.messages.some((m) => m.content.toLowerCase().includes(q)),
       )
     : sorted;
 
@@ -442,11 +462,16 @@ export default function Screen() {
                 updated_at: stamp,
                 messages: [
                   ...c.messages,
-                  { id: nextId("m-"), role: "assistant", content: craftReply(prompt), created_at: stamp },
+                  {
+                    id: nextId("m-"),
+                    role: "assistant",
+                    content: craftReply(prompt),
+                    created_at: stamp,
+                  },
                 ],
               }
-            : c
-        )
+            : c,
+        ),
       );
       setPending(false);
       setSync("saved");
@@ -463,15 +488,21 @@ export default function Screen() {
     if (!convId) {
       convId = nextId("c-");
       setConversations((prev) => [
-        { id: convId, title: titleFrom(text), created_at: stamp, updated_at: stamp, messages: [userMsg] },
+        {
+          id: convId,
+          title: titleFrom(text),
+          created_at: stamp,
+          updated_at: stamp,
+          messages: [userMsg],
+        },
         ...prev,
       ]);
       setSelectedId(convId);
     } else {
       setConversations((prev) =>
         prev.map((c) =>
-          c.id === convId ? { ...c, updated_at: stamp, messages: [...c.messages, userMsg] } : c
-        )
+          c.id === convId ? { ...c, updated_at: stamp, messages: [...c.messages, userMsg] } : c,
+        ),
       );
     }
     setDraft("");
@@ -485,8 +516,8 @@ export default function Screen() {
     const lastUser = [...conv.messages.slice(0, idx)].reverse().find((m) => m.role === "user");
     setConversations((prev) =>
       prev.map((c) =>
-        c.id === convId ? { ...c, messages: c.messages.filter((m) => m.id !== errorId) } : c
-      )
+        c.id === convId ? { ...c, messages: c.messages.filter((m) => m.id !== errorId) } : c,
+      ),
     );
     deliverReply(convId, lastUser ? lastUser.content : "");
   };
@@ -529,7 +560,11 @@ export default function Screen() {
         <style>{css}</style>
         <div
           className="w-full max-w-md p-8 text-center"
-          style={{ backgroundColor: "white", borderRadius: `calc(${brand.radius} * 2)`, border: `1px solid ${T.softLine}` }}
+          style={{
+            backgroundColor: "white",
+            borderRadius: `calc(${brand.radius} * 2)`,
+            border: `1px solid ${T.softLine}`,
+          }}
         >
           <div
             className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full"
@@ -544,14 +579,19 @@ export default function Screen() {
             Signed out everywhere
           </h1>
           <p className="mt-3 text-sm leading-relaxed" style={{ color: T.body }}>
-            Your access token was discarded on every device. All {conversations.length} conversations are
-            still saved to <strong style={{ color: T.ink }}>@{CURRENT_USER.username}</strong> — sign in again
-            to pick up where you left off.
+            Your access token was discarded on every device. All {conversations.length}{" "}
+            conversations are still saved to{" "}
+            <strong style={{ color: T.ink }}>@{CURRENT_USER.username}</strong> — sign in again to
+            pick up where you left off.
           </p>
           <UI.Button
-            onClick={() => navigate("login")}
+            onClick={handleLogout}
             className="pm-focus mt-6 w-full justify-center px-5 py-2.5 text-sm font-semibold"
-            style={{ backgroundColor: brand.primaryColor, color: "white", borderRadius: brand.radius }}
+            style={{
+              backgroundColor: brand.primaryColor,
+              color: "white",
+              borderRadius: brand.radius,
+            }}
           >
             Back to sign in
           </UI.Button>
@@ -593,12 +633,15 @@ export default function Screen() {
           >
             <Icons.Plus className="h-7 w-7" aria-hidden="true" />
           </div>
-          <h3 className="text-lg font-semibold" style={{ fontFamily: brand.fontHeading, color: T.ink }}>
+          <h3
+            className="text-lg font-semibold"
+            style={{ fontFamily: brand.fontHeading, color: T.ink }}
+          >
             New chat
           </h3>
           <p className="mt-2 max-w-sm text-sm leading-relaxed" style={{ color: T.body }}>
-            Type your first message below and the assistant will reply here. The chat gets its name from
-            whatever you say first.
+            Type your first message below and the assistant will reply here. The chat gets its name
+            from whatever you say first.
           </p>
           <ul className="mt-6 flex w-full max-w-md flex-col gap-2" role="list">
             {STARTERS.map((s) => (
@@ -628,7 +671,12 @@ export default function Screen() {
 
     let lastDay = null;
     return (
-      <ol className="space-y-3 px-4 py-6 sm:px-6" role="log" aria-live="polite" aria-label="Conversation messages">
+      <ol
+        className="space-y-3 px-4 py-6 sm:px-6"
+        role="log"
+        aria-live="polite"
+        aria-label="Conversation messages"
+      >
         {messages.map((m) => {
           const label = dayLabel(m.created_at);
           const showDay = label !== lastDay;
@@ -645,7 +693,10 @@ export default function Screen() {
                     borderBottomLeftRadius: brand.radius,
                   }}
                 >
-                  <p className="flex items-start gap-2 text-sm font-semibold" style={{ color: T.accentInk }}>
+                  <p
+                    className="flex items-start gap-2 text-sm font-semibold"
+                    style={{ color: T.accentInk }}
+                  >
                     <Icons.AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                     Reply didn't come through
                   </p>
@@ -686,7 +737,9 @@ export default function Screen() {
                 </li>
               )}
               <li className={"pm-rise flex " + (mine ? "justify-end" : "justify-start")}>
-                <div className={"max-w-[88%] sm:max-w-[72%] " + (mine ? "text-right" : "text-left")}>
+                <div
+                  className={"max-w-[88%] sm:max-w-[72%] " + (mine ? "text-right" : "text-left")}
+                >
                   <div
                     className="whitespace-pre-line px-4 py-3 text-left text-[15px] leading-relaxed"
                     style={{
@@ -754,13 +807,14 @@ export default function Screen() {
             Chats
           </h1>
           <p className="mt-1 text-sm" style={{ color: T.muted }}>
-            Signed in as <span style={{ color: T.body, fontWeight: 600 }}>@{CURRENT_USER.username}</span> ·{" "}
+            Signed in as{" "}
+            <span style={{ color: T.body, fontWeight: 600 }}>@{CURRENT_USER.username}</span> ·{" "}
             <span className="tabular-nums">{conversations.length}</span>{" "}
             {conversations.length === 1 ? "conversation" : "conversations"} saved
           </p>
         </div>
         <UI.Button
-          onClick={() => navigate("login")}
+          onClick={handleLogout}
           className="pm-focus px-4 py-2 text-sm font-semibold"
           style={{
             backgroundColor: "white",
@@ -795,7 +849,11 @@ export default function Screen() {
             <UI.Button
               onClick={startNewChat}
               className="pm-focus flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold"
-              style={{ backgroundColor: brand.primaryColor, color: "white", borderRadius: brand.radius }}
+              style={{
+                backgroundColor: brand.primaryColor,
+                color: "white",
+                borderRadius: brand.radius,
+              }}
             >
               <Icons.Plus className="h-4 w-4" aria-hidden="true" />
               New chat
@@ -835,7 +893,8 @@ export default function Screen() {
                   No chats yet
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed" style={{ color: T.muted }}>
-                  Start one with “New chat” — it will show up here the moment you send your first message.
+                  Start one with “New chat” — it will show up here the moment you send your first
+                  message.
                 </p>
               </div>
             ) : visible.length === 0 ? (
@@ -885,8 +944,8 @@ export default function Screen() {
                             Delete “{c.title}”?
                           </p>
                           <p className="mt-1 text-xs leading-relaxed" style={{ color: T.muted }}>
-                            <span className="tabular-nums">{c.messages.length}</span> messages will be removed
-                            from your history. This can't be undone.
+                            <span className="tabular-nums">{c.messages.length}</span> messages will
+                            be removed from your history. This can't be undone.
                           </p>
                           <div className="mt-3 flex gap-2">
                             <button
@@ -894,7 +953,11 @@ export default function Screen() {
                               ref={confirmBtnRef}
                               onClick={() => confirmDelete(c.id)}
                               className="pm-focus flex-1 px-3 py-1.5 text-xs font-semibold"
-                              style={{ backgroundColor: brand.primaryColor, color: "white", borderRadius: brand.radius }}
+                              style={{
+                                backgroundColor: brand.primaryColor,
+                                color: "white",
+                                borderRadius: brand.radius,
+                              }}
                             >
                               Delete chat
                             </button>
@@ -902,7 +965,12 @@ export default function Screen() {
                               type="button"
                               onClick={() => setConfirmId(null)}
                               className="pm-focus flex-1 px-3 py-1.5 text-xs font-semibold"
-                              style={{ backgroundColor: "white", color: T.body, border: `1px solid ${T.line}`, borderRadius: brand.radius }}
+                              style={{
+                                backgroundColor: "white",
+                                color: T.body,
+                                border: `1px solid ${T.line}`,
+                                borderRadius: brand.radius,
+                              }}
                             >
                               Keep it
                             </button>
@@ -928,17 +996,27 @@ export default function Screen() {
                               >
                                 {c.title}
                               </span>
-                              <span className="shrink-0 text-[11px] tabular-nums" style={{ color: T.muted }}>
+                              <span
+                                className="shrink-0 text-[11px] tabular-nums"
+                                style={{ color: T.muted }}
+                              >
                                 {shortStamp(c.updated_at)}
                               </span>
                             </span>
-                            <span className="mt-1 block truncate text-xs" style={{ color: T.muted }}>
+                            <span
+                              className="mt-1 block truncate text-xs"
+                              style={{ color: T.muted }}
+                            >
                               {previewOf(c)}
                             </span>
                             {failed && (
                               <span
                                 className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-                                style={{ backgroundColor: T.accentTint, color: T.accentInk, borderRadius: "999px" }}
+                                style={{
+                                  backgroundColor: T.accentTint,
+                                  color: T.accentInk,
+                                  borderRadius: "999px",
+                                }}
                               >
                                 <Icons.AlertCircle className="h-3 w-3" aria-hidden="true" />
                                 Reply failed
@@ -974,14 +1052,21 @@ export default function Screen() {
             >
               {CURRENT_USER.username.slice(0, 2).toUpperCase()}
             </span>
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold" style={{ color: T.ink }}>
+            <span
+              className="min-w-0 flex-1 truncate text-sm font-semibold"
+              style={{ color: T.ink }}
+            >
               @{CURRENT_USER.username}
             </span>
             <button
               type="button"
-              onClick={() => navigate("login")}
+              onClick={handleLogout}
               className="pm-focus px-3 py-1.5 text-xs font-semibold"
-              style={{ color: brand.primaryColor, borderRadius: brand.radius, border: `1px solid ${T.line}` }}
+              style={{
+                color: brand.primaryColor,
+                borderRadius: brand.radius,
+                border: `1px solid ${T.line}`,
+              }}
             >
               Log out
             </button>
