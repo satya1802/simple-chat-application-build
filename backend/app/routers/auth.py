@@ -1,25 +1,66 @@
 """Auth endpoints: self-registration and login.
 
-Generated as stubs from the approved API spec. `POST /auth/register` and
-`POST /auth/login` already validate their request body against the agreed
-shape -- a missing `username` or `password` is a 422 before this module's
-code ever runs -- and return a typed placeholder. The development sprint
-replaces each body with the real bcrypt hashing, the uniqueness check and the
-JWT issuance; no behaviour beyond FastAPI's own validation lives here yet.
+`POST /auth/register` creates the account immediately usable -- no
+invitation or approval step -- and rejects a taken username with 409 and an
+empty field with 422 (FastAPI/pydantic validation). `POST /auth/login`
+verifies the submitted password against the stored bcrypt hash and, on
+success, returns a PyJWT access token. A wrong password and an unknown
+username return the identical 401 so neither reveals the other.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-from app.schemas import LoginRequest, RegisterRequest, StubResponse
+from app.database import get_db
+from app.models import User
+from app.schemas import LoginRequest, RegisterRequest, TokenResponse
+from app.security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+_USERNAME_TAKEN = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={"code": "username_taken", "message": "That username is already taken."},
+)
 
-@router.post("/register", response_model=StubResponse)
-async def register(payload: RegisterRequest) -> StubResponse:
-    return StubResponse(endpoint="POST /auth/register")
+_INVALID_CREDENTIALS = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail={"code": "invalid_credentials", "message": "Incorrect username or password."},
+)
 
 
-@router.post("/login", response_model=StubResponse)
-async def login(payload: LoginRequest) -> StubResponse:
-    return StubResponse(endpoint="POST /auth/login")
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+async def register(
+    payload: RegisterRequest, db: Session = Depends(get_db)  # noqa: B008
+) -> TokenResponse:
+    existing = db.query(User).filter(User.username == payload.username).first()
+    if existing is not None:
+        raise _USERNAME_TAKEN
+
+    user = User(username=payload.username, password_hash=hash_password(payload.password))
+    db.add(user)
+    try:
+        db.commit()
+    except IntegrityError:
+        # Race with a concurrent registration of the same username: the
+        # uniqueness constraint catches it even though our own check above
+        # did not.
+        db.rollback()
+        raise _USERNAME_TAKEN from None
+    db.refresh(user)
+
+    token = create_access_token(user.id, user.username)
+    return TokenResponse(access_token=token)
+
+
+@router.post("/login", response_model=TokenResponse)
+async def login(
+    payload: LoginRequest, db: Session = Depends(get_db)  # noqa: B008
+) -> TokenResponse:
+    user = db.query(User).filter(User.username == payload.username).first()
+    if user is None or not verify_password(payload.password, user.password_hash):
+        raise _INVALID_CREDENTIALS
+
+    token = create_access_token(user.id, user.username)
+    return TokenResponse(access_token=token)

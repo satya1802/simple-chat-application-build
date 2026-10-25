@@ -3,6 +3,11 @@ appear in the OpenAPI document -- the same contract `test_health.py` applies
 to `/health`, extended to the routers this scaffold added so a typo in a path
 or a schema import breaks here, not on a development agent's first real
 request.
+
+The auth routes themselves now have real behaviour (see
+`tests/integration/test_auth.py` and `tests/test_security.py`); this module
+keeps only the route-registration check for auth and the stub round trip for
+the still-unimplemented conversation endpoints.
 """
 
 import uuid
@@ -18,20 +23,6 @@ def test_auth_routes_are_registered() -> None:
     paths = client.get("/openapi.json").json()["paths"]
     assert "/auth/register" in paths
     assert "/auth/login" in paths
-
-
-def test_register_stub_validates_its_shape() -> None:
-    ok = client.post("/auth/register", json={"username": "alice", "password": "secret123"})
-    assert ok.status_code == 200
-    assert ok.json()["status"] == "not_implemented"
-
-    missing_field = client.post("/auth/register", json={"username": "alice"})
-    assert missing_field.status_code == 422
-
-
-def test_login_stub_responds() -> None:
-    response = client.post("/auth/login", json={"username": "alice", "password": "secret123"})
-    assert response.status_code == 200
 
 
 def test_conversation_routes_are_registered() -> None:

@@ -11,7 +11,7 @@ each handler and swaps it for the real one.
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class StubResponse(BaseModel):
@@ -33,8 +33,10 @@ class StubResponse(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    username: str
-    password: str
+    # `min_length=1` turns an empty-string username or password into a 422
+    # naming the field, rather than a silently-accepted blank account.
+    username: str = Field(min_length=1)
+    password: str = Field(min_length=1)
 
 
 class LoginRequest(BaseModel):
